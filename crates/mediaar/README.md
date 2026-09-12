@@ -16,7 +16,7 @@ cargo install mediaar --locked
 ## Commands
 
 ```sh
-mediaar desktop   # Catppuccin GPUI desktop app (experiment)
+mediaar desktop   # Catppuccin GPUI desktop app
 mediaar tui       # Catppuccin ratatui welcome screen
 mediaar --lang es desktop   # force Spanish for this run
 mediaar --help
@@ -24,7 +24,7 @@ mediaar --help
 
 Locale files live in `locales/{en,es}/` as Fluent resources (`common.ftl` shared, plus `desktop.ftl` / `tui.ftl`). Language resolution uses usage-config layers: `--lang` → `~/.config/mediaar/config.toml` (UI toggle) → system locale default (`LANG` / `LC_*`, else `en`).
 
-Both UIs ship inside the `mediaar` binary. Desktop is native GPUI (no embedded webview).
+Both UIs ship inside the `mediaar` binary. Desktop is native GPUI (no embedded webview). See [`INFRA.md`](../../INFRA.md) for why GPUI replaced Tauri.
 
 ## Develop
 
@@ -32,14 +32,6 @@ Both UIs ship inside the `mediaar` binary. Desktop is native GPUI (no embedded w
 cargo run -p mediaar -- tui
 cargo run -p mediaar -- desktop
 ```
-
-## Benchmarks (Tauri → GPUI experiment)
-
-```sh
-./benches/measure-desktop.sh gpui benches/results-gpui.json
-```
-
-Compares package rebuild time, binary size, `--help` startup, and desktop ready-file startup. See `benches/results-*.json`.
 
 ## Distribute
 

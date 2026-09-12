@@ -37,10 +37,6 @@ run = [
   "cargo check --workspace",
 ]
 
-[tasks.bench-desktop]
-description = "Measure desktop build time, binary size, and startup"
-run = "benches/measure-desktop.sh"
-
 [tasks.pack-release]
 description = "Build release tarball with binary, man, zsh completion, desktop entry, icons"
 run = "scripts/pack-release.sh"

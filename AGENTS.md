@@ -6,7 +6,7 @@ Guidance for coding agents working in this repository.
 
 Mediaar is **one Cargo package / one binary** (`crates/mediaar`) with two frontends:
 
-- `mediaar desktop` — GPUI + Catppuccin Latte/Mocha (experiment: replaces Tauri/Solid)
+- `mediaar desktop` — GPUI + Catppuccin Latte/Mocha
 - `mediaar tui` — ratatui + `catppuccin` crate, same flavors
 
 Do **not** split desktop into a second installable crate.
@@ -20,7 +20,7 @@ Do **not** split desktop into a second installable crate.
 | Tool versions / tasks | `mise.toml` |
 | Infra overview | `INFRA.md` |
 | Package README | `crates/mediaar/README.md` |
-| Desktop metrics | `benches/measure-desktop.sh`, `benches/results-*.json` |
+| Tauri→GPUI comparison | tag `comparison/gpui-vs-tauri` (`benches/`; not on `main`) |
 
 When adding/changing CLI flags or subcommands, update the Rust CLI first, then refresh `usage/mediaar.usage.kdl`.
 
@@ -54,7 +54,8 @@ cargo build -p mediaar --release
 
 ## Do not
 
-- Reintroduce Tauri / Solid / Vite for this experiment branch without an explicit decision
+- Reintroduce Tauri / Solid / Vite without an explicit decision (see `INFRA.md`)
+- Check experiment `benches/` metrics back into `main` (keep them on `comparison/gpui-vs-tauri`)
 - Add purple-default generic AI chrome; stick to Catppuccin Latte/Mocha and the existing welcome composition
 - Commit secrets (`.env`), `node_modules`, or unrelated lockfile churn
 

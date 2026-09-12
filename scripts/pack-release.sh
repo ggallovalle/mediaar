@@ -58,7 +58,7 @@ mkdir -p packaging/man packaging/completions packaging/icons packaging/applicati
 "$BIN" __usage_spec__ | mise exec -- usage generate manpage -f - >packaging/man/mediaar.1
 
 # Keep packaging/completions/_mediaar as the checked-in binary-backed script.
-# Refresh icon copies from the Tauri icon set.
+# Refresh icon copies from the crate icon set.
 cp -f crates/mediaar/icons/32x32.png packaging/icons/32x32.png
 cp -f crates/mediaar/icons/128x128.png packaging/icons/128x128.png
 cp -f "crates/mediaar/icons/128x128@2x.png" packaging/icons/256x256.png
