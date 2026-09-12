@@ -15,13 +15,6 @@ impl ThemeMode {
         }
     }
 
-    pub fn label(self) -> &'static str {
-        match self {
-            Self::Light => "Latte",
-            Self::Dark => "Mocha",
-        }
-    }
-
     pub fn flavor(self) -> &'static Flavor {
         match self {
             Self::Light => &PALETTE.latte,

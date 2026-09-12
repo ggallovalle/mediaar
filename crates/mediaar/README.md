@@ -18,8 +18,11 @@ cargo install mediaar --locked
 ```sh
 mediaar desktop   # Catppuccin Tauri + Solid desktop app
 mediaar tui       # Catppuccin ratatui welcome screen
+mediaar --lang es desktop   # force Spanish for this run
 mediaar --help
 ```
+
+Locale files live in `locales/{en,es}/` as Fluent resources (`common.ftl` shared, plus `desktop.ftl` / `tui.ftl`). Language resolution uses usage-config layers: `--lang` → `~/.config/mediaar/config.toml` (UI toggle) → system locale default (`LANG` / `LC_*`, else `en`).
 
 Both UIs ship inside the `mediaar` binary. The desktop frontend is embedded at build time from `ui/dist`.
 

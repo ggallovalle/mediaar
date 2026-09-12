@@ -1,13 +1,15 @@
-use usage::{Args, Run};
+use usage::{Args, RunWith};
+
+use crate::i18n::Locale;
 
 /// Start the desktop app
 #[derive(Args)]
 pub(crate) struct Desktop;
 
-impl Run for Desktop {
+impl RunWith<Locale> for Desktop {
     type Output = ();
 
-    fn run(self) {
-        crate::desktop::run();
+    fn run_with(self, locale: Locale) {
+        crate::desktop::run(locale);
     }
 }

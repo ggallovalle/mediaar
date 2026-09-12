@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@fluent/bundle": "^0.19.1",
     "@solidjs/web": "2.0.0-rc.8",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",

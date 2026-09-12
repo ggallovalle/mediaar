@@ -15,6 +15,23 @@ fn ensure_frontend_dist() {
     println!("cargo:rerun-if-changed={}", ui_dir.join("index.html").display());
     println!("cargo:rerun-if-changed={}", ui_dir.join("package.json").display());
     println!("cargo:rerun-if-changed={}", index.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        manifest_dir.join("locales").display()
+    );
+    // Also watch individual locale files for incremental builds.
+    for locale in ["en", "es"] {
+        for resource in ["common", "desktop", "tui"] {
+            println!(
+                "cargo:rerun-if-changed={}",
+                manifest_dir
+                    .join("locales")
+                    .join(locale)
+                    .join(format!("{resource}.ftl"))
+                    .display()
+            );
+        }
+    }
 
     if index.is_file() || std::env::var_os("MEDIAAR_SKIP_UI_BUILD").is_some() {
         return;

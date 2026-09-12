@@ -39,6 +39,7 @@ When adding/changing CLI flags or subcommands, update the Rust CLI first, then r
 | Desktop host | `crates/mediaar/src/desktop.rs` |
 | TUI | `crates/mediaar/src/tui/` |
 | Welcome UI | `crates/mediaar/ui/src/` |
+| Fluent locales | `crates/mediaar/locales/{en,es}/{common,desktop,tui}.ftl` |
 | Tauri config / icons / capabilities | `crates/mediaar/tauri.conf.json`, `icons/`, `capabilities/` |
 | Build / embed hooks | `crates/mediaar/build.rs` |
 | User install script | `install.sh` |

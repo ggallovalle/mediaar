@@ -8,5 +8,4 @@ if (!root) {
   throw new Error("Root element #root not found");
 }
 
-document.documentElement.classList.add("mocha");
 render(() => <App />, root);
