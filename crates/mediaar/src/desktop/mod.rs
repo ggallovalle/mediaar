@@ -4,8 +4,8 @@ mod settings_window;
 mod welcome;
 
 use gpui::{
-    App, Application, Bounds, Global, KeyBinding, TitlebarOptions, WindowAppearance, WindowBounds,
-    WindowHandle, WindowOptions, actions, prelude::*, px, size,
+    App, Bounds, Global, KeyBinding, TitlebarOptions, WindowAppearance, WindowBounds, WindowHandle,
+    WindowOptions, actions, prelude::*, px, size,
 };
 use kbgpui::theme::{self, Theme};
 
@@ -116,7 +116,7 @@ fn open_settings(cx: &mut App) {
 }
 
 pub fn run(state: CliState) {
-    Application::new()
+    gpui_platform::application()
         .with_assets(kbgpui::Assets)
         .run(move |cx: &mut App| {
             theme::init(cx);

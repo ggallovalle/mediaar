@@ -388,7 +388,7 @@ impl ContextMenu {
                 item.on_hover(cx.listener(move |this, hovered, window, cx| {
                     if *hovered {
                         this.select_index(ix, window, cx);
-                        window.focus(&this.focus_handle);
+                        window.focus(&this.focus_handle, cx);
                         cx.notify();
                     }
                 }))

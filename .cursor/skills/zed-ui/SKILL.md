@@ -23,7 +23,7 @@ File paths, search recipes, and crate roots: [reference.md](reference.md).
 2. Read that file and its deps (`Label`, `h_flex`, `Color`, `DynamicSpacing`, `ToggleState`).
 3. Port into `crates/kbgpui/src/ui/` with the **same module layout and constructor names**.
 4. Colors: `cx.theme().colors()` / `.status()`. Add Catppuccin tokens in `crates/kbgpui/src/theme.rs` if missing. No hex in the widget.
-5. Drop `RegisterComponent`, `KeyBinding`, AccessKit (`.role`, `aria_*`) unless Mediaar’s `gpui` crate actually has them (crates.io `0.2.2` does not).
+5. Drop `RegisterComponent`. AccessKit (`.role`, `aria_*`) exists on Mediaar’s git-pinned GPUI; still skip Zed-only `KeyBinding` helpers that are not in kbgpui.
 6. Use from `crates/mediaar/src/desktop.rs` via `kbgpui::ui::prelude::*`. Init theme with `kbgpui::theme::init(cx)`.
 7. Done when call sites match Zed (`SwitchField::new(id, Some(label), Some(desc), state, |state, window, cx| …)`) and `cargo clippy -p kbgpui -p mediaar -- -D warnings` is clean.
 

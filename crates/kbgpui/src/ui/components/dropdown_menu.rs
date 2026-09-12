@@ -1,4 +1,4 @@
-use gpui::{Corner, Entity, Pixels, Point};
+use gpui::{Anchor, Entity, Pixels, Point};
 
 use crate::ui::prelude::*;
 use crate::ui::traits::disableable::Disableable;
@@ -29,7 +29,7 @@ pub struct DropdownMenu {
     full_width: bool,
     disabled: bool,
     handle: Option<PopoverMenuHandle<ContextMenu>>,
-    attach: Option<Corner>,
+    attach: Option<Anchor>,
     offset: Option<Point<Pixels>>,
     chevron: bool,
 }
@@ -81,7 +81,7 @@ impl DropdownMenu {
         self
     }
 
-    pub fn attach(mut self, attach: Corner) -> Self {
+    pub fn attach(mut self, attach: Anchor) -> Self {
         self.attach = Some(attach);
         self
     }
@@ -134,8 +134,8 @@ impl RenderOnce for DropdownMenu {
             }))
             .menu(move |_window, _cx| Some(self.menu.clone()))
             .trigger(text_button)
-            .anchor(Corner::TopRight)
-            .attach(self.attach.unwrap_or(Corner::BottomRight))
+            .anchor(Anchor::TopRight)
+            .attach(self.attach.unwrap_or(Anchor::BottomRight))
             .when_some(self.offset, |this, offset| this.offset(offset))
     }
 }

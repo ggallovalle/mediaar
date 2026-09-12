@@ -45,7 +45,7 @@ impl SettingsWindow {
             );
             editor
         });
-        search_bar.focus_handle(cx).focus(window);
+        search_bar.focus_handle(cx).focus(window, cx);
         let _search = cx.subscribe(&search_bar, |this, _, _: &InputEvent, cx| {
             this.sync_page_to_query(cx);
             cx.notify();
@@ -213,7 +213,7 @@ impl SettingsWindow {
             .on_mouse_down(
                 gpui::MouseButton::Left,
                 cx.listener(|this, _, window, cx| {
-                    this.search_bar.focus_handle(cx).focus(window);
+                    this.search_bar.focus_handle(cx).focus(window, cx);
                 }),
             )
             .child(Icon::new(IconName::MagnifyingGlass).color(Color::Muted))

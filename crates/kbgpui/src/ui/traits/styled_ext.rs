@@ -30,12 +30,14 @@ pub trait StyledExt: Styled + Sized {
                     offset: point(px(0.), px(2.)),
                     blur_radius: px(3.),
                     spread_radius: px(0.),
+                    inset: false,
                 },
                 BoxShadow {
                     color: hsla(0., 0., 0., 0.06),
                     offset: point(px(0.), px(1.)),
                     blur_radius: px(0.),
                     spread_radius: px(0.),
+                    inset: false,
                 },
             ])
     }

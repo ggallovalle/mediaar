@@ -3,7 +3,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use gpui::{
-    AnchoredPositionMode, AnyElement, App, Bounds, Corner, DismissEvent, DispatchPhase, Element,
+    Anchor, AnchoredPositionMode, AnyElement, App, Bounds, DismissEvent, DispatchPhase, Element,
     ElementId, Entity, Focusable as _, GlobalElementId, HitboxBehavior, HitboxId,
     InspectorElementId, InteractiveElement, IntoElement, LayoutId, Length, ManagedView,
     MouseDownEvent, ParentElement, Pixels, Point, Style, Window, anchored, deferred, div, point,
@@ -88,8 +88,8 @@ pub struct PopoverMenu<M: ManagedView> {
         >,
     >,
     menu_builder: Option<Rc<dyn Fn(&mut Window, &mut App) -> Option<Entity<M>> + 'static>>,
-    anchor: Corner,
-    attach: Option<Corner>,
+    anchor: Anchor,
+    attach: Option<Anchor>,
     offset: Option<Point<Pixels>>,
     trigger_handle: Option<PopoverMenuHandle<M>>,
     on_open: Option<Rc<dyn Fn(&mut Window, &mut App)>>,
@@ -102,7 +102,7 @@ impl<M: ManagedView> PopoverMenu<M> {
             id: id.into(),
             child_builder: None,
             menu_builder: None,
-            anchor: Corner::TopLeft,
+            anchor: Anchor::TopLeft,
             attach: None,
             offset: None,
             trigger_handle: None,
@@ -144,12 +144,12 @@ impl<M: ManagedView> PopoverMenu<M> {
         self
     }
 
-    pub fn anchor(mut self, anchor: Corner) -> Self {
+    pub fn anchor(mut self, anchor: Anchor) -> Self {
         self.anchor = anchor;
         self
     }
 
-    pub fn attach(mut self, attach: Corner) -> Self {
+    pub fn attach(mut self, attach: Anchor) -> Self {
         self.attach = Some(attach);
         self
     }
@@ -164,12 +164,16 @@ impl<M: ManagedView> PopoverMenu<M> {
         self
     }
 
-    fn resolved_attach(&self) -> Corner {
+    fn resolved_attach(&self) -> Anchor {
         self.attach.unwrap_or(match self.anchor {
-            Corner::TopLeft => Corner::BottomLeft,
-            Corner::TopRight => Corner::BottomRight,
-            Corner::BottomLeft => Corner::TopLeft,
-            Corner::BottomRight => Corner::TopRight,
+            Anchor::TopLeft => Anchor::BottomLeft,
+            Anchor::TopCenter => Anchor::BottomCenter,
+            Anchor::TopRight => Anchor::BottomRight,
+            Anchor::BottomLeft => Anchor::TopLeft,
+            Anchor::BottomCenter => Anchor::TopCenter,
+            Anchor::BottomRight => Anchor::TopRight,
+            Anchor::LeftCenter => Anchor::LeftCenter,
+            Anchor::RightCenter => Anchor::RightCenter,
         })
     }
 
@@ -177,8 +181,13 @@ impl<M: ManagedView> PopoverMenu<M> {
         self.offset.unwrap_or_else(|| {
             let offset = rems_from_px(5.0_f32) * window.rem_size();
             match self.anchor {
-                Corner::TopRight | Corner::BottomRight => point(offset, px(0.0_f32)),
-                Corner::TopLeft | Corner::BottomLeft => point(-offset, px(0.0_f32)),
+                Anchor::TopRight | Anchor::BottomRight | Anchor::RightCenter => {
+                    point(offset, px(0.0_f32))
+                }
+                Anchor::TopLeft | Anchor::BottomLeft | Anchor::LeftCenter => {
+                    point(-offset, px(0.0_f32))
+                }
+                Anchor::TopCenter | Anchor::BottomCenter => point(px(0.0_f32), px(0.0_f32)),
             }
         })
     }
@@ -202,7 +211,7 @@ fn show_menu<M: ManagedView>(
             if modal.focus_handle(cx).contains_focused(window, cx)
                 && let Some(previous_focus_handle) = previous_focus_handle.as_ref()
             {
-                window.focus(previous_focus_handle);
+                window.focus(previous_focus_handle, cx);
             }
             *menu2.borrow_mut() = None;
             window.refresh();
@@ -211,8 +220,8 @@ fn show_menu<M: ManagedView>(
 
     let focus_handle = new_menu.focus_handle(cx);
     window.on_next_frame(move |window, _cx| {
-        window.on_next_frame(move |window, _cx| {
-            window.focus(&focus_handle);
+        window.on_next_frame(move |window, cx| {
+            window.focus(&focus_handle, cx);
         });
     });
     *menu.borrow_mut() = Some(new_menu);

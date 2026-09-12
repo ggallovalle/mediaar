@@ -26,6 +26,7 @@ catppuccin = { workspace = true }
 crossterm = { workspace = true }
 fluent = { workspace = true }
 gpui = { workspace = true }
+gpui_platform = { workspace = true }
 kbgpui = { workspace = true }
 ratatui = { workspace = true }
 unic-langid = { workspace = true }

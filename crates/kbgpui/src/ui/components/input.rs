@@ -624,6 +624,8 @@ impl Element for InputElement {
             line.paint(
                 point(bounds.origin.x - scroll_x, bounds.origin.y),
                 window.line_height(),
+                gpui::TextAlign::Left,
+                None,
                 window,
                 cx,
             )

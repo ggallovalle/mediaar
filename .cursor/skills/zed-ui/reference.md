@@ -66,7 +66,7 @@ use ui::{SwitchField, ToggleState};
 - `Render` = retained view. `RenderOnce` + `IntoElement` = stateless widget.
 - Style methods: `styled.rs` + `gpui_macros`. Interaction: `elements/div.rs` (`.id()`, `.on_click()`, `.hover()`, `.group_hover()`).
 - Clicks: bubble phase. Nested handlers both fire without `cx.stop_propagation()`.
-- crates.io `gpui 0.2.2` (Mediaar) is older than this tree: no AccessKit `.role` / `aria_*`. Copy geometry from `ui`; don’t assume git GPUI APIs exist.
+- Mediaar pins GPUI from the Zed git repo (`Cargo.toml` `rev`); AccessKit `.role` / `aria_*` exist. Still skip `RegisterComponent` and editor.
 
 ## `ui` tree
 
