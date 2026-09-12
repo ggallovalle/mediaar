@@ -12,7 +12,7 @@ use crate::settings::Settings;
 #[usage(
     bin = "mediaar",
     name = "Mediaar",
-    version = "0.1.0",
+    version = "0.2.0",
     completion,
     config = Settings
 )]

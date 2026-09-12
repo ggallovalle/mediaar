@@ -1,9 +1,9 @@
 [tools]
-biome = "2.5.11"
 lefthook = "2.1.6"
 node = "26.3.1"
 rust = "1.98.0"
 usage = "6.8.0"
+pnpm = "10.14.0"
 
 [tasks.dev-desktop]
 description = "Run Mediaar desktop from the single binary"
@@ -18,17 +18,17 @@ description = "Build the distributable mediaar binary"
 run = "cargo build -p mediaar --release"
 
 [tasks.format]
-description = "Format Rust (rustfmt) and remaining JS tooling configs (Biome)"
+description = "Format Rust (rustfmt) and configs (Biome via pnpm)"
 run = [
   "cargo fmt --all",
-  "biome format --write",
+  "pnpm exec biome format --write",
 ]
 
 [tasks.lint]
-description = "Lint Rust (clippy) and Biome"
+description = "Lint Rust (clippy) and Biome via pnpm"
 run = [
   "cargo clippy --workspace --all-targets -- -D warnings",
-  "biome lint",
+  "pnpm exec biome lint",
 ]
 
 [tasks.typecheck]

@@ -1,0 +1,12 @@
+{
+  "name": "mediaar",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.11"
+  },
+  "scripts": {
+    "format": "biome format --write",
+    "lint": "biome lint"
+  }
+}
