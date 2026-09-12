@@ -35,8 +35,40 @@ pub struct ThemeColors {
     pub border_focused: Hsla,
     /// Border color. Used for transparent borders.
     pub border_transparent: Hsla,
+    /// App / window background.
+    pub background: Hsla,
+    /// Grounded surfaces (sidebar, panels).
+    pub surface_background: Hsla,
+    /// Elevated surfaces (menus, dropdowns).
+    pub elevated_surface_background: Hsla,
+    /// Hover fill for controls that sit on a surface.
+    pub element_hover: Hsla,
+    /// Selected fill for nav rows and menu entries.
+    pub element_selected: Hsla,
+    /// Pressed / active fill.
+    pub element_active: Hsla,
     /// Background Color. Used for the disabled state of an element.
     pub element_disabled: Hsla,
+    /// Default fill for outlined / filled buttons.
+    pub element_background: Hsla,
+    /// Panel / sidebar background.
+    pub panel_background: Hsla,
+    /// Editor / search field background.
+    pub editor_background: Hsla,
+    /// Lower-contrast border (outlined buttons).
+    pub border_variant: Hsla,
+    /// Border color for disabled controls.
+    pub border_disabled: Hsla,
+    /// Transparent fill for ghost / outlined controls on a surface.
+    pub ghost_element_background: Hsla,
+    /// Hover fill for ghost list rows and menus.
+    pub ghost_element_hover: Hsla,
+    /// Pressed fill for ghost list rows.
+    pub ghost_element_active: Hsla,
+    /// Selected fill for ghost list rows (keyboard highlight).
+    pub ghost_element_selected: Hsla,
+    /// Disabled fill for ghost / subtle controls.
+    pub ghost_element_disabled: Hsla,
     /// Text Color. Default text color used for most text.
     pub text: Hsla,
     /// Text Color. Color of muted or deemphasized text.
@@ -52,6 +84,17 @@ pub struct ThemeColors {
 pub struct StatusColors {
     /// Represents informational status updates or messages.
     pub info: Hsla,
+    pub info_background: Hsla,
+    pub info_border: Hsla,
+    pub error: Hsla,
+    pub error_background: Hsla,
+    pub error_border: Hsla,
+    pub warning: Hsla,
+    pub warning_background: Hsla,
+    pub warning_border: Hsla,
+    pub success: Hsla,
+    pub success_background: Hsla,
+    pub success_border: Hsla,
 }
 
 /// A theme is a collection of colors used to build a consistent appearance.
@@ -81,7 +124,23 @@ impl Theme {
                 border: ctp(&colors.surface1),
                 border_focused: ctp(&colors.lavender),
                 border_transparent: transparent_black(),
+                background: ctp(&colors.base),
+                surface_background: ctp(&colors.mantle),
+                elevated_surface_background: ctp(&colors.surface0),
+                element_hover: ctp(&colors.surface1),
+                element_selected: ctp(&colors.surface1),
+                element_active: ctp(&colors.surface1),
                 element_disabled: ctp(&colors.surface1),
+                element_background: ctp(&colors.surface0),
+                panel_background: ctp(&colors.mantle),
+                editor_background: ctp(&colors.base),
+                border_variant: ctp(&colors.surface1),
+                border_disabled: ctp(&colors.overlay0),
+                ghost_element_background: transparent_black(),
+                ghost_element_hover: ctp(&colors.surface1).opacity(0.6),
+                ghost_element_active: ctp(&colors.surface1),
+                ghost_element_selected: ctp(&colors.surface1),
+                ghost_element_disabled: ctp(&colors.surface1).opacity(0.4),
                 text: ctp(&colors.text),
                 text_muted: ctp(&colors.subtext0),
                 text_disabled: ctp(&colors.overlay0),
@@ -89,6 +148,17 @@ impl Theme {
             },
             status: StatusColors {
                 info: ctp(&colors.blue),
+                info_background: ctp(&colors.blue).opacity(0.2),
+                info_border: ctp(&colors.blue),
+                error: ctp(&colors.red),
+                error_background: ctp(&colors.red).opacity(0.2),
+                error_border: ctp(&colors.red),
+                warning: ctp(&colors.yellow),
+                warning_background: ctp(&colors.yellow).opacity(0.2),
+                warning_border: ctp(&colors.yellow),
+                success: ctp(&colors.green),
+                success_background: ctp(&colors.green).opacity(0.2),
+                success_border: ctp(&colors.green),
             },
         }
     }

@@ -12,3 +12,8 @@ pub mod utils;
 pub use components::*;
 pub use prelude::*;
 pub use styles::*;
+
+/// Bind UI key contexts (menus, etc.). Call after [`crate::theme::init`].
+pub fn init(cx: &mut gpui::App) {
+    components::init(cx);
+}

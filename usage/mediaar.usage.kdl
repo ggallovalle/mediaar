@@ -3,7 +3,7 @@ bin mediaar
 version "0.2.0"
 about "Manage your media"
 subcommand_required #true
-flag --lang help="UI language (e.g. en, es). Overrides the persisted toggle and system locale." global=#true {
+flag --lang help="UI language (e.g. en, es). Overrides the config file and system locale." global=#true {
     arg <LANG>
 }
 flag "-h --help" help="Print help" action=help builtin=#true
@@ -19,5 +19,12 @@ config {
     file "$XDG_CONFIG_HOME/mediaar/config.toml" scope="global" format="toml"
     prop "lang" type="string" default_note="from LANG / system, else en" optional=#true help="UI language (e.g. en, es)" {
         cli "--lang"
+    }
+    prop "theme.mode" type="string" default="dark" help="Theme appearance: light, dark, or follow the OS." {
+        choices {
+            choice "light"
+            choice "dark"
+            choice "system"
+        }
     }
 }

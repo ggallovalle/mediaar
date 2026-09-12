@@ -21,6 +21,7 @@ unic-langid = "0.9"
 usage = { package = "usage-rs", version = "6", features = ["completions", "config"] }
 usage-config = { version = "6", features = ["toml"] }
 toml = "0.9"
+toml_edit = "0.23"
 
 [profile.release]
 codegen-units = 1

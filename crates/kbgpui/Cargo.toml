@@ -9,3 +9,4 @@ publish = false
 [dependencies]
 catppuccin = { workspace = true }
 gpui = { workspace = true }
+unicode-segmentation = "1"

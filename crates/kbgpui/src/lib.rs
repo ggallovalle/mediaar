@@ -3,5 +3,8 @@
 //! - [`theme`] is the analog of Zed's `theme` crate (`cx.theme()`, Catppuccin Latte/Mocha).
 //! - [`ui`] is the analog of Zed's `ui` crate (`prelude`, `components`, `styles`, `traits`).
 
+pub mod assets;
 pub mod theme;
 pub mod ui;
+
+pub use assets::Assets;

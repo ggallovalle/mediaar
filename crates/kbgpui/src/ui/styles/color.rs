@@ -19,6 +19,9 @@ pub enum Color {
     Hint,
     /// A color used for informational messages or status indicators.
     Info,
+    Error,
+    Warning,
+    Success,
     /// A color used for text or UI elements that should be visually muted.
     Muted,
     /// A color used to indicate selected text or UI elements.
@@ -34,6 +37,9 @@ impl Color {
             Color::Disabled => cx.theme().colors().text_disabled,
             Color::Hint => cx.theme().status().info,
             Color::Info => cx.theme().status().info,
+            Color::Error => cx.theme().status().error,
+            Color::Warning => cx.theme().status().warning,
+            Color::Success => cx.theme().status().success,
             Color::Accent => cx.theme().colors().text_accent,
             Color::Selected => cx.theme().colors().text_accent,
             Color::Custom(color) => *color,

@@ -31,6 +31,7 @@ ratatui = { workspace = true }
 unic-langid = { workspace = true }
 usage = { workspace = true }
 usage-config = { workspace = true }
+toml_edit = { workspace = true }
 
 [dev-dependencies]
 usage = { package = "usage-rs", version = "6", features = ["test"] }

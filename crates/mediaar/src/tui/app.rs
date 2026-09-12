@@ -10,9 +10,16 @@ use ratatui::{DefaultTerminal, Frame};
 
 use crate::cli::CliState;
 use crate::i18n;
-use crate::settings::Settings;
+use crate::settings::{Settings, ThemeAppearanceMode};
 
 use super::theme::{Theme, ThemeMode};
+
+fn theme_from_settings(mode: ThemeAppearanceMode) -> ThemeMode {
+    match mode {
+        ThemeAppearanceMode::Light => ThemeMode::Light,
+        ThemeAppearanceMode::Dark | ThemeAppearanceMode::System => ThemeMode::Dark,
+    }
+}
 
 struct App {
     theme: Theme,
@@ -23,9 +30,25 @@ struct App {
 impl App {
     fn new(settings: Settings) -> Self {
         Self {
-            theme: Theme::new(ThemeMode::Dark),
+            theme: Theme::new(theme_from_settings(settings.theme_mode)),
             settings,
             should_quit: false,
+        }
+    }
+
+    fn persist_lang(&self) {
+        if let Err(err) = crate::settings::write_user("lang", &self.settings.lang.to_string()) {
+            eprintln!("config warning: {err}");
+        }
+    }
+
+    fn persist_theme(&self) {
+        let mode = match self.theme.mode {
+            ThemeMode::Light => "light",
+            ThemeMode::Dark => "dark",
+        };
+        if let Err(err) = crate::settings::write_user("theme.mode", mode) {
+            eprintln!("config warning: {err}");
         }
     }
 
@@ -38,9 +61,11 @@ impl App {
             }
             (KeyCode::Char('t'), _) | (KeyCode::Tab, _) => {
                 self.theme.toggle();
+                self.persist_theme();
             }
             (KeyCode::Char('l'), _) => {
                 self.settings.lang = i18n::cycle(&self.settings.lang).into();
+                self.persist_lang();
             }
             _ => {}
         }

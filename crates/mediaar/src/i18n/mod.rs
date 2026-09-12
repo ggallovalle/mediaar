@@ -36,18 +36,24 @@ fn langid(tag: &str) -> LanguageIdentifier {
     })
 }
 
+/// Locales shipped with the binary.
+pub fn shipped() -> &'static [&'static str] {
+    SHIPPED
+}
+
+/// Catalog key used to pick Fluent resources (`en` or `es`).
+pub fn catalog_key(id: &LanguageIdentifier) -> &'static str {
+    match id.language.as_str() {
+        "es" => "es",
+        _ => "en",
+    }
+}
+
 /// Next shipped locale in the cycle (for UI / TUI toggles).
 pub fn cycle(current: &LanguageIdentifier) -> LanguageIdentifier {
     let key = catalog_key(current);
     let idx = SHIPPED.iter().position(|tag| *tag == key).unwrap_or(0);
     langid(SHIPPED[(idx + 1) % SHIPPED.len()])
-}
-
-fn catalog_key(id: &LanguageIdentifier) -> &'static str {
-    match id.language.as_str() {
-        "es" => "es",
-        _ => "en",
-    }
 }
 
 fn parse_env_tag(raw: &str) -> Option<LanguageIdentifier> {
@@ -333,7 +339,7 @@ mod tests {
         let en = langid("en");
         assert_eq!(t_desktop(&en, "welcome-title", None).as_ref(), "Welcome");
         assert!(
-            t_desktop(&en, "showcase-nested", None).contains("language control"),
+            t_desktop(&en, "showcase-nested", None).contains("Open Settings"),
             "{}",
             t_desktop(&en, "showcase-nested", None)
         );

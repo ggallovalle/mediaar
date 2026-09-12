@@ -34,5 +34,6 @@ pub fn load(cli_layer: &CliLayer) -> Settings {
 fn fallback() -> Settings {
     Settings {
         lang: i18n::system_locale().unwrap_or_else(i18n::fallback).into(),
+        theme_mode: super::ThemeAppearanceMode::Dark,
     }
 }

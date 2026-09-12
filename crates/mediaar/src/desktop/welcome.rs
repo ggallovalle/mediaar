@@ -1,88 +1,49 @@
-//! In-process GPUI desktop shell embedded in the `mediaar` binary.
-//!
-//! Experiment branch: replaces the former Tauri + Solid welcome UI.
-
 use catppuccin::{Flavor, PALETTE};
-use fluent::{FluentArgs, FluentValue};
-use gpui::{
-    App, Application, Bounds, Context, FontWeight, SharedString, TitlebarOptions, Window,
-    WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
-};
-use kbgpui::theme::{self, Theme};
-use kbgpui::ui::SwitchField;
+use fluent::FluentArgs;
+use gpui::{Context, FontWeight, SharedString, Subscription, Window, div, prelude::*, px, rgb};
 use kbgpui::ui::prelude::*;
 
-use crate::cli::CliState;
+use super::{LiveSettings, OpenSettings, open_settings, resolved_theme_mode};
 use crate::i18n;
 use crate::settings::Settings;
 use crate::tui::ThemeMode;
 
-fn write_bench_ready() {
-    if let Ok(path) = std::env::var("MEDIAAR_BENCH_READY_FILE") {
-        let _ = std::fs::write(path, b"ready\n");
-    }
-}
-
-fn ctp(color: &catppuccin::Color) -> gpui::Rgba {
-    let r = u32::from(color.rgb.r);
-    let g = u32::from(color.rgb.g);
-    let b = u32::from(color.rgb.b);
-    rgb((r << 16) | (g << 8) | b)
-}
-
-struct Welcome {
+pub(super) struct Welcome {
     settings: Settings,
-    theme: ThemeMode,
     session_date: String,
+    _settings: Subscription,
+    _appearance: Subscription,
 }
 
 impl Welcome {
-    fn new(settings: Settings) -> Self {
+    pub(super) fn new(settings: Settings, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let session_date = i18n::format_session_date(&settings.lang);
+        let _settings = cx.observe_global::<LiveSettings>(|this, cx| {
+            this.settings = cx.global::<LiveSettings>().0.clone();
+            this.session_date = i18n::format_session_date(&this.settings.lang);
+            cx.notify();
+        });
+        let _appearance = cx.observe_window_appearance(window, |_, _, cx| {
+            super::apply_theme(cx);
+            cx.notify();
+        });
         Self {
             settings,
-            theme: ThemeMode::Dark,
             session_date,
+            _settings,
+            _appearance,
         }
     }
 
-    fn flavor(&self) -> &'static Flavor {
-        match self.theme {
+    fn theme(&self, cx: &gpui::App) -> ThemeMode {
+        resolved_theme_mode(self.settings.theme_mode, cx)
+    }
+
+    fn flavor(&self, cx: &gpui::App) -> &'static Flavor {
+        match self.theme(cx) {
             ThemeMode::Light => &PALETTE.latte,
             ThemeMode::Dark => &PALETTE.mocha,
         }
-    }
-
-    fn theme_key(&self) -> &'static str {
-        match self.theme {
-            ThemeMode::Light => "latte",
-            ThemeMode::Dark => "mocha",
-        }
-    }
-
-    fn next_theme_key(&self) -> &'static str {
-        match self.theme {
-            ThemeMode::Light => "mocha",
-            ThemeMode::Dark => "latte",
-        }
-    }
-
-    fn toggle_theme(&mut self, cx: &mut Context<Self>) {
-        self.theme = self.theme.toggle();
-        theme::set_theme(
-            cx,
-            match self.theme {
-                ThemeMode::Light => Theme::latte(),
-                ThemeMode::Dark => Theme::mocha(),
-            },
-        );
-        cx.notify();
-    }
-
-    fn toggle_lang(&mut self, cx: &mut Context<Self>) {
-        self.settings.lang = i18n::cycle(&self.settings.lang).into();
-        self.session_date = i18n::format_session_date(&self.settings.lang);
-        cx.notify();
     }
 
     fn msg(&self, id: &str) -> SharedString {
@@ -96,17 +57,18 @@ impl Welcome {
             .into_owned()
             .into()
     }
-
-    fn attr(&self, id: &str, attr: &str, args: Option<&FluentArgs<'_>>) -> SharedString {
-        i18n::t_attr_desktop(&self.settings.lang, id, attr, args)
-            .into_owned()
-            .into()
-    }
 }
 
-impl Render for Welcome {
+fn ctp(color: &catppuccin::Color) -> gpui::Rgba {
+    let r = u32::from(color.rgb.r);
+    let g = u32::from(color.rgb.g);
+    let b = u32::from(color.rgb.b);
+    rgb((r << 16) | (g << 8) | b)
+}
+
+impl gpui::Render for Welcome {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let colors = &self.flavor().colors;
+        let colors = &self.flavor(cx).colors;
         let base = ctp(&colors.base);
         let crust = ctp(&colors.crust);
         let text = ctp(&colors.text);
@@ -116,18 +78,7 @@ impl Render for Welcome {
         let lavender = ctp(&colors.lavender);
         let surface1 = ctp(&colors.surface1);
 
-        let theme_key = self.theme_key().to_owned();
-        let next_theme_key = self.next_theme_key().to_owned();
-        let lang_tag = self.settings.lang.to_string();
         let session_date = self.session_date.clone();
-
-        let mut theme_args = FluentArgs::new();
-        theme_args.set("theme", FluentValue::from(theme_key.as_str()));
-        theme_args.set("next", FluentValue::from(next_theme_key.as_str()));
-
-        let mut lang_args = FluentArgs::new();
-        lang_args.set("lang", FluentValue::from(lang_tag.as_str()));
-
         let showcase = i18n::showcase_args("Alex", &session_date);
 
         let brand = self.msg("app-brand");
@@ -140,14 +91,7 @@ impl Render for Welcome {
         let number = self.msg_args("showcase-number", &showcase);
         let date = self.msg_args("showcase-date", &showcase);
         let nested = self.msg("showcase-nested");
-
-        let lang_label = self.attr("lang-toggle", "label", Some(&lang_args));
-        let lang_hint = self.attr("lang-toggle", "hint", None);
-        let theme_label = self.attr("theme-toggle", "label", Some(&theme_args));
-        let theme_hint = self.attr("theme-toggle", "hint", Some(&theme_args));
-
-        let lang_on = ToggleState::from(self.settings.lang.language.as_str() == "es");
-        let theme_on = ToggleState::from(matches!(self.theme, ThemeMode::Dark));
+        let settings_label = self.msg("settings-open");
 
         div()
             .size_full()
@@ -156,6 +100,7 @@ impl Render for Welcome {
             .bg(base)
             .text_color(text)
             .font_family("Figtree")
+            .on_action(cx.listener(|_, _: &OpenSettings, _, cx| open_settings(cx)))
             .child(
                 div()
                     .absolute()
@@ -217,23 +162,16 @@ impl Render for Welcome {
                                     .child(brand),
                             )
                             .child(
-                                div()
-                                    .flex()
-                                    .gap_2()
-                                    .child(SwitchField::new(
-                                        "lang-toggle",
-                                        Some(lang_label),
-                                        Some(lang_hint),
-                                        lang_on,
-                                        cx.listener(|this, _, _, cx| this.toggle_lang(cx)),
-                                    ))
-                                    .child(SwitchField::new(
-                                        "theme-toggle",
-                                        Some(theme_label),
-                                        Some(theme_hint),
-                                        theme_on,
-                                        cx.listener(|this, _, _, cx| this.toggle_theme(cx)),
-                                    )),
+                                h_flex()
+                                    .id("open-settings")
+                                    .h(px(28.))
+                                    .px_2()
+                                    .rounded_md()
+                                    .border_1()
+                                    .border_color(surface1)
+                                    .cursor_pointer()
+                                    .child(Label::new(settings_label).size(LabelSize::Small))
+                                    .on_click(cx.listener(|_, _, _, cx| open_settings(cx))),
                             ),
                     )
                     .child(
@@ -290,27 +228,4 @@ fn showcase_row(text: SharedString, accent: gpui::Rgba, color: gpui::Rgba) -> im
         .text_sm()
         .text_color(color)
         .child(text)
-}
-
-pub fn run(state: CliState) {
-    Application::new().run(move |cx: &mut App| {
-        theme::init(cx);
-        let bounds = Bounds::centered(None, size(px(960.), px(640.)), cx);
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                titlebar: Some(TitlebarOptions {
-                    title: Some("Mediaar".into()),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-            move |_, cx| {
-                write_bench_ready();
-                cx.new(|_| Welcome::new(state.settings.clone()))
-            },
-        )
-        .unwrap();
-        cx.activate(true);
-    });
 }
