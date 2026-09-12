@@ -1,6 +1,13 @@
-name "Mediaar"
-bin "mediaar"
+name Mediaar
+bin mediaar
+version "0.1.0"
 about "Manage your media"
-
-cmd "desktop" help="Start the desktop app"
-cmd "tui" help="Start the tui app"
+subcommand_required #true
+flag "-h --help" help="Print help" action=help builtin=#true
+flag "-V --version" help="Print version" action=version builtin=#true
+cmd desktop help="Start the desktop app" {
+    flag "-h --help" help="Print help" action=help builtin=#true
+}
+cmd tui help="Start the tui app" {
+    flag "-h --help" help="Print help" action=help builtin=#true
+}

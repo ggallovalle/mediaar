@@ -1,0 +1,49 @@
+[package]
+name = "mediaar"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Manage your media"
+readme = "README.md"
+keywords = ["media", "tui", "desktop", "tauri"]
+categories = ["command-line-utilities", "gui"]
+default-run = "mediaar"
+include = [
+  "src/**/*",
+  "ui/dist/**/*",
+  "ui/package.json",
+  "ui/pnpm-lock.yaml",
+  "icons/**/*",
+  "capabilities/**/*",
+  "tauri.conf.json",
+  "build.rs",
+  "README.md",
+]
+
+[[bin]]
+name = "mediaar"
+path = "src/main.rs"
+
+[dependencies]
+catppuccin = { workspace = true }
+crossterm = { workspace = true }
+ratatui = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tauri = { workspace = true }
+tauri-plugin-opener = { workspace = true }
+usage = { workspace = true }
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
+[dev-dependencies]
+usage = { package = "usage-rs", version = "6", features = ["test"] }
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ version }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"

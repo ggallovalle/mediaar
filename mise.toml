@@ -2,3 +2,21 @@
 node = "26.3.1"
 rust = "1.98.0"
 usage = "4.1.0"
+
+[tasks.ui]
+description = "Install and build the embedded desktop UI"
+run = "pnpm --dir crates/mediaar/ui install && pnpm --dir crates/mediaar/ui build"
+
+[tasks.dev-desktop]
+description = "Run Mediaar desktop from the single binary"
+depends = ["ui"]
+run = "cargo run -p mediaar -- desktop"
+
+[tasks.dev-tui]
+description = "Run Mediaar TUI from the single binary"
+run = "cargo run -p mediaar -- tui"
+
+[tasks.build]
+description = "Build the distributable mediaar binary"
+depends = ["ui"]
+run = "cargo build -p mediaar --release"

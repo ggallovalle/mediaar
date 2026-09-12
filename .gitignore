@@ -1,5 +1,18 @@
 # env
-
 .env
 .env.local
 .env.development
+
+# rust
+/target
+
+# node / ui
+**/node_modules
+**/dist
+.DS_Store
+*.local
+crates/mediaar/app-icon.png
+
+# editors
+.vscode/*
+!.vscode/extensions.json
