@@ -7,10 +7,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use usage::config::{
-    resolve, CliLayer, EnvLayer, FileLayer, Layers, SourceKind, XdgBase,
-};
 use usage::Config;
+use usage::config::{CliLayer, EnvLayer, FileLayer, Layers, SourceKind, XdgBase, resolve};
 
 use crate::i18n::{self, Locale};
 
@@ -157,10 +155,8 @@ mod tests {
     #[test]
     fn save_lang_writes_toml() {
         let _guard = ENV_LOCK.lock().unwrap();
-        let dir = std::env::temp_dir().join(format!(
-            "mediaar-settings-write-{}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("mediaar-settings-write-{}", std::process::id()));
         let previous = std::env::var_os("XDG_CONFIG_HOME");
         unsafe {
             std::env::set_var("XDG_CONFIG_HOME", &dir);

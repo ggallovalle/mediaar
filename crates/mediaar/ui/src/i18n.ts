@@ -35,7 +35,12 @@ export function negotiate(raw: string | null | undefined): LocaleTag {
   if (!raw) {
     return "en";
   }
-  const normalized = raw.trim().replaceAll("_", "-").split(".")[0]?.split("@")[0]?.toLowerCase();
+  const normalized = raw
+    .trim()
+    .replaceAll("_", "-")
+    .split(".")[0]
+    ?.split("@")[0]
+    ?.toLowerCase();
   if (!normalized) {
     return "en";
   }
@@ -78,10 +83,15 @@ export function t(tag: string, id: string, args?: Args): string {
   return value;
 }
 
-export function tAttr(tag: string, id: string, attr: string, args?: Args): string {
+export function tAttr(
+  tag: string,
+  id: string,
+  attr: string,
+  args?: Args,
+): string {
   const bundle = loadBundle(negotiate(tag));
   const message = bundle.getMessage(id);
-  const attribute = message?.attributes.get(attr);
+  const attribute = message?.attributes[attr];
   if (!attribute) {
     return `${id}.${attr}`;
   }

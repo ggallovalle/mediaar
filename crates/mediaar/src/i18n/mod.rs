@@ -67,7 +67,10 @@ pub fn cycle(current: &str) -> String {
 fn normalize_tag(raw: &str) -> String {
     let trimmed = raw.trim().replace('_', "-");
     let without_encoding = trimmed.split('.').next().unwrap_or(&trimmed);
-    let primary = without_encoding.split('@').next().unwrap_or(without_encoding);
+    let primary = without_encoding
+        .split('@')
+        .next()
+        .unwrap_or(without_encoding);
     primary.to_ascii_lowercase()
 }
 

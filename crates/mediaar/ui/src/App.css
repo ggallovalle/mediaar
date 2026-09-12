@@ -175,7 +175,8 @@ body {
   margin: 0 1.75rem 2.5rem;
   max-width: 40rem;
   padding: 1.25rem 0 0;
-  border-top: 1px solid color-mix(in oklab, var(--color-ctp-surface1) 80%, transparent);
+  border-top: 1px solid
+    color-mix(in oklab, var(--color-ctp-surface1) 80%, transparent);
   animation: rise 900ms ease-out 280ms both;
 }
 

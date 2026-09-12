@@ -60,7 +60,6 @@ pub fn run(locale: Locale) -> io::Result<()> {
 fn run_app(terminal: &mut DefaultTerminal, locale: Locale) -> io::Result<()> {
     let mut app = App::new(locale);
 
-
     loop {
         terminal.draw(|frame| draw(frame, &app))?;
 

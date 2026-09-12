@@ -1,0 +1,10 @@
+pre-commit:
+  parallel: false
+  jobs:
+    - name: format
+      run: mise run format
+      stage_fixed: true
+    - name: lint
+      run: mise run lint
+    - name: typecheck
+      run: mise run typecheck

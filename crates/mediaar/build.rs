@@ -12,8 +12,14 @@ fn ensure_frontend_dist() {
     let index = ui_dir.join("dist").join("index.html");
 
     println!("cargo:rerun-if-changed={}", ui_dir.join("src").display());
-    println!("cargo:rerun-if-changed={}", ui_dir.join("index.html").display());
-    println!("cargo:rerun-if-changed={}", ui_dir.join("package.json").display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        ui_dir.join("index.html").display()
+    );
+    println!(
+        "cargo:rerun-if-changed={}",
+        ui_dir.join("package.json").display()
+    );
     println!("cargo:rerun-if-changed={}", index.display());
     println!(
         "cargo:rerun-if-changed={}",
