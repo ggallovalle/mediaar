@@ -4,7 +4,7 @@ mod i18n;
 mod settings;
 mod tui;
 
-use cli::Mediaar;
+use cli::{CliState, Mediaar};
 use settings::Settings;
 use usage::RunWith;
 
@@ -14,6 +14,7 @@ fn main() {
         Settings::SETTINGS_REGISTRY.drift(Mediaar::SETTINGS_BINDINGS),
         Vec::<String>::new()
     );
-    let locale = settings::resolve_locale(&cli_layer);
-    cli.command.run_with(locale);
+    cli.command.run_with(CliState {
+        settings: settings::load(&cli_layer),
+    });
 }

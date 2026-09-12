@@ -16,9 +16,7 @@ const ES_DESKTOP: &str = include_str!("../../locales/es/desktop.ftl");
 const ES_TUI: &str = include_str!("../../locales/es/tui.ftl");
 
 /// Locales shipped with the binary / UI bundle.
-pub const AVAILABLE: &[&str] = &["en", "es"];
-
-pub const FALLBACK: &str = "en";
+const SHIPPED: &[&str] = &["en", "es"];
 
 type Bundle = FluentBundle<FluentResource>;
 
@@ -27,83 +25,68 @@ static ES_TUI_BUNDLE: OnceLock<Bundle> = OnceLock::new();
 static EN_DESKTOP_BUNDLE: OnceLock<Bundle> = OnceLock::new();
 static ES_DESKTOP_BUNDLE: OnceLock<Bundle> = OnceLock::new();
 
-/// Resolved UI language for a session.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Locale {
-    /// Canonical tag among [`AVAILABLE`] (e.g. `en`, `es`).
-    pub tag: String,
-    /// True when `--lang` selected this locale for the current process.
-    pub from_cli: bool,
+pub fn fallback() -> LanguageIdentifier {
+    langid("en")
 }
 
-impl Locale {
-    pub fn as_str(&self) -> &str {
-        &self.tag
+fn langid(tag: &str) -> LanguageIdentifier {
+    tag.parse().unwrap_or_else(|_| {
+        "en".parse()
+            .expect("en is a well-formed language identifier")
+    })
+}
+
+/// Next shipped locale in the cycle (for UI / TUI toggles).
+pub fn cycle(current: &LanguageIdentifier) -> LanguageIdentifier {
+    let key = catalog_key(current);
+    let idx = SHIPPED.iter().position(|tag| *tag == key).unwrap_or(0);
+    langid(SHIPPED[(idx + 1) % SHIPPED.len()])
+}
+
+fn catalog_key(id: &LanguageIdentifier) -> &'static str {
+    match id.language.as_str() {
+        "es" => "es",
+        _ => "en",
     }
 }
 
-/// Map a user/system tag onto a shipped locale.
-pub fn negotiate(raw: &str) -> String {
-    let normalized = normalize_tag(raw);
-    if AVAILABLE.contains(&normalized.as_str()) {
-        return normalized;
+fn parse_env_tag(raw: &str) -> Option<LanguageIdentifier> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty()
+        || trimmed.eq_ignore_ascii_case("c")
+        || trimmed.eq_ignore_ascii_case("posix")
+    {
+        return None;
     }
-
-    let primary = normalized.split('-').next().unwrap_or(FALLBACK);
-    if AVAILABLE.contains(&primary) {
-        return primary.to_string();
-    }
-
-    FALLBACK.to_string()
-}
-
-/// Next locale in the cycle (for UI / TUI toggles).
-pub fn cycle(current: &str) -> String {
-    let current = negotiate(current);
-    let idx = AVAILABLE
-        .iter()
-        .position(|tag| *tag == current)
-        .unwrap_or(0);
-    let next = AVAILABLE[(idx + 1) % AVAILABLE.len()];
-    next.to_string()
-}
-
-fn normalize_tag(raw: &str) -> String {
-    let trimmed = raw.trim().replace('_', "-");
-    let without_encoding = trimmed.split('.').next().unwrap_or(&trimmed);
-    let primary = without_encoding
+    let without_encoding = trimmed.split('.').next().unwrap_or(trimmed);
+    let without_modifier = without_encoding
         .split('@')
         .next()
         .unwrap_or(without_encoding);
-    primary.to_ascii_lowercase()
+    without_modifier.parse().ok()
 }
 
-/// Read `LC_ALL` / `LC_MESSAGES` / `LANG` into a shipped locale tag.
-pub fn system_locale() -> Option<String> {
+/// Read `LC_ALL` / `LC_MESSAGES` / `LANG` into a language identifier.
+pub fn system_locale() -> Option<LanguageIdentifier> {
     for key in ["LC_ALL", "LC_MESSAGES", "LANG"] {
-        if let Ok(value) = std::env::var(key) {
-            let value = value.trim();
-            if value.is_empty()
-                || value.eq_ignore_ascii_case("c")
-                || value.eq_ignore_ascii_case("posix")
-            {
-                continue;
-            }
-            return Some(negotiate(value));
+        if let Ok(value) = std::env::var(key)
+            && let Some(id) = parse_env_tag(&value)
+        {
+            return Some(id);
         }
     }
     None
 }
 
-fn tui_bundle(tag: &str) -> &'static Bundle {
-    match negotiate(tag).as_str() {
+fn tui_bundle(id: &LanguageIdentifier) -> &'static Bundle {
+    match catalog_key(id) {
         "es" => ES_TUI_BUNDLE.get_or_init(|| load_bundle("es", &[ES_COMMON, ES_TUI])),
         _ => EN_TUI_BUNDLE.get_or_init(|| load_bundle("en", &[EN_COMMON, EN_TUI])),
     }
 }
 
-fn desktop_bundle(tag: &str) -> &'static Bundle {
-    match negotiate(tag).as_str() {
+fn desktop_bundle(id: &LanguageIdentifier) -> &'static Bundle {
+    match catalog_key(id) {
         "es" => ES_DESKTOP_BUNDLE.get_or_init(|| load_bundle("es", &[ES_COMMON, ES_DESKTOP])),
         _ => EN_DESKTOP_BUNDLE.get_or_init(|| load_bundle("en", &[EN_COMMON, EN_DESKTOP])),
     }
@@ -185,34 +168,46 @@ fn format_attr(
     Cow::Owned(value.into_owned())
 }
 
-/// Format a TUI / shared message value for `tag`.
-pub fn t<'a>(tag: &str, id: &str, args: Option<&'a FluentArgs<'a>>) -> Cow<'static, str> {
-    format_message(tui_bundle(tag), tag, id, args)
+/// Format a TUI / shared message value for `lang`.
+pub fn t<'a>(
+    lang: &LanguageIdentifier,
+    id: &str,
+    args: Option<&'a FluentArgs<'a>>,
+) -> Cow<'static, str> {
+    let key = catalog_key(lang);
+    format_message(tui_bundle(lang), key, id, args)
 }
 
 /// Format a TUI / shared message attribute (e.g. `theme-toggle.label`).
 pub fn t_attr<'a>(
-    tag: &str,
+    lang: &LanguageIdentifier,
     id: &str,
     attr: &str,
     args: Option<&'a FluentArgs<'a>>,
 ) -> Cow<'static, str> {
-    format_attr(tui_bundle(tag), tag, id, attr, args)
+    let key = catalog_key(lang);
+    format_attr(tui_bundle(lang), key, id, attr, args)
 }
 
-/// Format a desktop message value for `tag` (common + desktop.ftl).
-pub fn t_desktop<'a>(tag: &str, id: &str, args: Option<&'a FluentArgs<'a>>) -> Cow<'static, str> {
-    format_message(desktop_bundle(tag), tag, id, args)
+/// Format a desktop message value for `lang` (common + desktop.ftl).
+pub fn t_desktop<'a>(
+    lang: &LanguageIdentifier,
+    id: &str,
+    args: Option<&'a FluentArgs<'a>>,
+) -> Cow<'static, str> {
+    let key = catalog_key(lang);
+    format_message(desktop_bundle(lang), key, id, args)
 }
 
 /// Format a desktop message attribute.
 pub fn t_attr_desktop<'a>(
-    tag: &str,
+    lang: &LanguageIdentifier,
     id: &str,
     attr: &str,
     args: Option<&'a FluentArgs<'a>>,
 ) -> Cow<'static, str> {
-    format_attr(desktop_bundle(tag), tag, id, attr, args)
+    let key = catalog_key(lang);
+    format_attr(desktop_bundle(lang), key, id, attr, args)
 }
 
 /// Args commonly used by the welcome / showcase surfaces.
@@ -226,7 +221,7 @@ pub fn showcase_args<'a>(name: &'a str, date: &'a str) -> FluentArgs<'a> {
 }
 
 /// Format today's date for the active locale (host-side stand-in for DATETIME).
-pub fn format_session_date(tag: &str) -> String {
+pub fn format_session_date(lang: &LanguageIdentifier) -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     let Ok(duration) = SystemTime::now().duration_since(UNIX_EPOCH) else {
@@ -235,14 +230,15 @@ pub fn format_session_date(tag: &str) -> String {
     let days = duration.as_secs() / 86_400;
     // Civil date from Unix day count (proleptic Gregorian).
     let (y, m, d) = civil_from_days(i64::try_from(days).unwrap_or(0));
-    let month = month_name(tag, m);
-    match tag {
+    let key = catalog_key(lang);
+    let month = month_name(key, m);
+    match key {
         "es" => format!("{d} de {month} de {y}"),
         _ => format!("{month} {d}, {y}"),
     }
 }
 
-fn month_name(tag: &str, month: u32) -> &'static str {
+fn month_name(key: &str, month: u32) -> &'static str {
     const EN: [&str; 12] = [
         "January",
         "February",
@@ -272,7 +268,7 @@ fn month_name(tag: &str, month: u32) -> &'static str {
         "diciembre",
     ];
     let idx = month.saturating_sub(1) as usize;
-    match tag {
+    match key {
         "es" => ES.get(idx).copied().unwrap_or(""),
         _ => EN.get(idx).copied().unwrap_or(""),
     }
@@ -298,40 +294,48 @@ mod tests {
     use super::*;
 
     #[test]
-    fn negotiate_primary_and_fallback() {
-        assert_eq!(negotiate("es-MX.UTF-8"), "es");
-        assert_eq!(negotiate("en_US"), "en");
-        assert_eq!(negotiate("fr"), "en");
+    fn parse_env_strips_encoding() {
+        let es_mx = parse_env_tag("es-MX.UTF-8").unwrap();
+        assert_eq!(es_mx.language.as_str(), "es");
+        assert_eq!(parse_env_tag("en_US").unwrap().language.as_str(), "en");
+        assert!(parse_env_tag("C").is_none());
     }
 
     #[test]
-    fn cycle_rotates_available() {
-        assert_eq!(cycle("en"), "es");
-        assert_eq!(cycle("es"), "en");
+    fn cycle_rotates_shipped() {
+        let en = langid("en");
+        let es = langid("es");
+        assert_eq!(cycle(&en), es);
+        assert_eq!(cycle(&es), en);
+        assert_eq!(cycle(&langid("es-MX")), en);
     }
 
     #[test]
     fn formats_shared_and_tui_messages() {
-        assert_eq!(t("en", "app-brand", None).as_ref(), "Mediaar");
-        assert_eq!(t("es", "tui-tagline", None).as_ref(), "Gestiona tu media");
-        assert!(t("en", "showcase-nested", None).contains("Press l"));
+        let en = langid("en");
+        let es = langid("es");
+        assert_eq!(t(&en, "app-brand", None).as_ref(), "Mediaar");
+        assert_eq!(t(&es, "tui-tagline", None).as_ref(), "Gestiona tu media");
+        assert!(t(&en, "showcase-nested", None).contains("Press l"));
     }
 
     #[test]
     fn formats_number_builtin() {
-        let date = format_session_date("en");
+        let en = langid("en");
+        let date = format_session_date(&en);
         let args = showcase_args("Alex", &date);
-        let value = t("en", "showcase-number", Some(&args));
+        let value = t(&en, "showcase-number", Some(&args));
         assert!(value.contains("1.5"), "{value}");
     }
 
     #[test]
     fn formats_desktop_welcome() {
-        assert_eq!(t_desktop("en", "welcome-title", None).as_ref(), "Welcome");
+        let en = langid("en");
+        assert_eq!(t_desktop(&en, "welcome-title", None).as_ref(), "Welcome");
         assert!(
-            t_desktop("en", "showcase-nested", None).contains("language control"),
+            t_desktop(&en, "showcase-nested", None).contains("language control"),
             "{}",
-            t_desktop("en", "showcase-nested", None)
+            t_desktop(&en, "showcase-nested", None)
         );
     }
 }

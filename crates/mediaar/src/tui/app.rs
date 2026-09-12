@@ -8,21 +8,23 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Padding, Paragraph};
 use ratatui::{DefaultTerminal, Frame};
 
-use crate::i18n::{self, Locale};
+use crate::cli::CliState;
+use crate::i18n;
+use crate::settings::Settings;
 
 use super::theme::{Theme, ThemeMode};
 
 struct App {
     theme: Theme,
-    locale: Locale,
+    settings: Settings,
     should_quit: bool,
 }
 
 impl App {
-    fn new(locale: Locale) -> Self {
+    fn new(settings: Settings) -> Self {
         Self {
             theme: Theme::new(ThemeMode::Dark),
-            locale,
+            settings,
             should_quit: false,
         }
     }
@@ -38,27 +40,22 @@ impl App {
                 self.theme.toggle();
             }
             (KeyCode::Char('l'), _) => {
-                let next = i18n::cycle(self.locale.as_str());
-                if let Err(err) = crate::settings::save_lang(&next) {
-                    eprintln!("failed to persist language: {err}");
-                }
-                self.locale.tag = next;
-                self.locale.from_cli = false;
+                self.settings.lang = i18n::cycle(&self.settings.lang).into();
             }
             _ => {}
         }
     }
 }
 
-pub fn run(locale: Locale) -> io::Result<()> {
+pub fn run(state: CliState) -> io::Result<()> {
     let mut terminal = ratatui::init();
-    let result = run_app(&mut terminal, locale);
+    let result = run_app(&mut terminal, state.settings);
     ratatui::restore();
     result
 }
 
-fn run_app(terminal: &mut DefaultTerminal, locale: Locale) -> io::Result<()> {
-    let mut app = App::new(locale);
+fn run_app(terminal: &mut DefaultTerminal, settings: Settings) -> io::Result<()> {
+    let mut app = App::new(settings);
 
     loop {
         terminal.draw(|frame| draw(frame, &app))?;
@@ -97,7 +94,8 @@ fn draw(frame: &mut Frame, app: &App) {
 
 fn draw_welcome(frame: &mut Frame, area: Rect, app: &App) {
     let theme = app.theme;
-    let lang = app.locale.as_str();
+    let lang = &app.settings.lang;
+    let lang_tag = lang.to_string();
 
     let block = Block::default()
         .borders(Borders::ALL)
@@ -117,7 +115,7 @@ fn draw_welcome(frame: &mut Frame, area: Rect, app: &App) {
     theme_args.set("theme", FluentValue::from(theme_key));
 
     let mut lang_args = FluentArgs::new();
-    lang_args.set("lang", FluentValue::from(lang));
+    lang_args.set("lang", FluentValue::from(lang_tag.as_str()));
 
     let session_date = i18n::format_session_date(lang);
     let showcase = i18n::showcase_args("Alex", &session_date);

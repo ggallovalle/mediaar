@@ -24,12 +24,9 @@ path = "src/main.rs"
 [dependencies]
 catppuccin = { workspace = true }
 crossterm = { workspace = true }
-dirs = { workspace = true }
 fluent = { workspace = true }
 gpui = { workspace = true }
 ratatui = { workspace = true }
-serde = { workspace = true }
-toml = { workspace = true }
 unic-langid = { workspace = true }
 usage = { workspace = true }
 usage-config = { workspace = true }

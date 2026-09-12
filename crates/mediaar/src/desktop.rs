@@ -9,8 +9,9 @@ use gpui::{
     Window, WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
 };
 
-use crate::i18n::{self, Locale};
-use crate::settings;
+use crate::cli::CliState;
+use crate::i18n;
+use crate::settings::Settings;
 use crate::tui::ThemeMode;
 
 fn write_bench_ready() {
@@ -27,17 +28,16 @@ fn ctp(color: &catppuccin::Color) -> gpui::Rgba {
 }
 
 struct Welcome {
-    locale: String,
+    settings: Settings,
     theme: ThemeMode,
     session_date: String,
 }
 
 impl Welcome {
-    fn new(locale: Locale) -> Self {
-        let tag = locale.tag;
-        let session_date = i18n::format_session_date(&tag);
+    fn new(settings: Settings) -> Self {
+        let session_date = i18n::format_session_date(&settings.lang);
         Self {
-            locale: tag,
+            settings,
             theme: ThemeMode::Dark,
             session_date,
         }
@@ -70,27 +70,25 @@ impl Welcome {
     }
 
     fn toggle_lang(&mut self, cx: &mut Context<Self>) {
-        let next = i18n::cycle(&self.locale);
-        if let Err(err) = settings::save_lang(&next) {
-            eprintln!("failed to persist language: {err}");
-        }
-        self.locale = next;
-        self.session_date = i18n::format_session_date(&self.locale);
+        self.settings.lang = i18n::cycle(&self.settings.lang).into();
+        self.session_date = i18n::format_session_date(&self.settings.lang);
         cx.notify();
     }
 
     fn msg(&self, id: &str) -> SharedString {
-        i18n::t_desktop(&self.locale, id, None).into_owned().into()
+        i18n::t_desktop(&self.settings.lang, id, None)
+            .into_owned()
+            .into()
     }
 
     fn msg_args(&self, id: &str, args: &FluentArgs<'_>) -> SharedString {
-        i18n::t_desktop(&self.locale, id, Some(args))
+        i18n::t_desktop(&self.settings.lang, id, Some(args))
             .into_owned()
             .into()
     }
 
     fn attr(&self, id: &str, attr: &str, args: Option<&FluentArgs<'_>>) -> SharedString {
-        i18n::t_attr_desktop(&self.locale, id, attr, args)
+        i18n::t_attr_desktop(&self.settings.lang, id, attr, args)
             .into_owned()
             .into()
     }
@@ -112,7 +110,7 @@ impl Render for Welcome {
 
         let theme_key = self.theme_key().to_owned();
         let next_theme_key = self.next_theme_key().to_owned();
-        let locale_tag = self.locale.clone();
+        let lang_tag = self.settings.lang.to_string();
         let session_date = self.session_date.clone();
 
         let mut theme_args = FluentArgs::new();
@@ -120,7 +118,7 @@ impl Render for Welcome {
         theme_args.set("next", FluentValue::from(next_theme_key.as_str()));
 
         let mut lang_args = FluentArgs::new();
-        lang_args.set("lang", FluentValue::from(locale_tag.as_str()));
+        lang_args.set("lang", FluentValue::from(lang_tag.as_str()));
 
         let showcase = i18n::showcase_args("Alex", &session_date);
 
@@ -334,7 +332,7 @@ fn showcase_row(text: SharedString, accent: gpui::Rgba, color: gpui::Rgba) -> im
         .child(text)
 }
 
-pub fn run(locale: Locale) {
+pub fn run(state: CliState) {
     Application::new().run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(960.), px(640.)), cx);
         cx.open_window(
@@ -348,7 +346,7 @@ pub fn run(locale: Locale) {
             },
             move |_, cx| {
                 write_bench_ready();
-                cx.new(|_| Welcome::new(locale))
+                cx.new(|_| Welcome::new(state.settings.clone()))
             },
         )
         .unwrap();
