@@ -1,0 +1,6 @@
+name "Mediaar"
+bin "mediaar"
+about "Manage your media"
+
+cmd "desktop" help="Start the desktop app"
+cmd "tui" help="Start the tui app"
