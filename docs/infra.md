@@ -28,7 +28,7 @@ git show comparison/gpui-vs-tauri:benches/COMPARISON.md
 
 ## Toolchain
 
-Pinned in [`mise.toml`](mise.toml):
+Pinned in [`mise.toml`](../mise.toml):
 
 | Tool | Role |
 | --- | --- |
@@ -48,7 +48,7 @@ Package manager: **Cargo** (Rust).
 
 ## Layout
 
-```
+```text
 mediaar/
 ├── Cargo.toml                 # workspace root
 ├── install.sh                 # curl|sh user installer (mise-style)
@@ -64,14 +64,14 @@ mediaar/
 
 ## Runtime shape
 
-```
+```text
 mediaar desktop  →  in-process GPUI window
 mediaar tui      →  in-process ratatui app
 ```
 
 One artifact: `target/release/mediaar`.
 
-CLI surface is declared with **usage-rs** and should match [`usage/mediaar.usage.kdl`](usage/mediaar.usage.kdl). Refresh the checked-in spec with:
+CLI surface is declared with **usage-rs** and should match [`usage/mediaar.usage.kdl`](../usage/mediaar.usage.kdl). Refresh the checked-in spec with:
 
 ```sh
 cargo run -p mediaar -- __usage_spec__ > usage/mediaar.usage.kdl
@@ -98,7 +98,7 @@ GPUI needs a working Wayland or X11 display stack (Vulkan/Metal backends via Bla
 
 ### curl | sh (user install)
 
-[`install.sh`](install.sh) is a mise-style user installer (not system-wide). It places:
+[`install.sh`](../install.sh) is a mise-style user installer (not system-wide). It places:
 
 | Artifact | Path |
 | --- | --- |
@@ -110,4 +110,4 @@ GPUI needs a working Wayland or X11 display stack (Vulkan/Metal backends via Bla
 
 ### GitHub Release / binstall
 
-[`scripts/pack-release.sh`](scripts/pack-release.sh) builds a versioned `.tgz` plus `SHA256SUMS.txt` under `dist/`. See [`RELEASE.md`](RELEASE.md).
+[`scripts/pack-release.sh`](../scripts/pack-release.sh) builds a versioned `.tgz` plus `SHA256SUMS.txt` under `dist/`. See [`release.md`](release.md).

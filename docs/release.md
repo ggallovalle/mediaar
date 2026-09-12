@@ -17,8 +17,8 @@ Bump these together so `--version` and the archive name agree:
 
 | Location | Field |
 | --- | --- |
-| [`Cargo.toml`](Cargo.toml) | `[workspace.package] version` |
-| [`crates/mediaar/src/cli/mod.rs`](crates/mediaar/src/cli/mod.rs) | `#[usage(..., version = "...")]` |
+| [`Cargo.toml`](../Cargo.toml) | `[workspace.package] version` |
+| [`crates/mediaar/src/cli/mod.rs`](../crates/mediaar/src/cli/mod.rs) | `#[usage(..., version = "...")]` |
 
 Example for `0.2.0`:
 
