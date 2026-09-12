@@ -359,25 +359,8 @@ install_mediaar() {
   fi
 
   if [ "$os" = "linux" ]; then
-    desktop_src=""
-    if [ -f "$root/mediaar.desktop" ]; then
-      desktop_src="$root/mediaar.desktop"
-    elif [ -f "$root/share/applications/mediaar.desktop" ]; then
-      desktop_src="$root/share/applications/mediaar.desktop"
-    fi
-
-    if [ -n "$desktop_src" ]; then
-      mkdir -p "$(dirname "$desktop_path")"
-      # Rewrite Exec= to the absolute installed binary so GUI launchers work without PATH.
-      sed "s|@MEDIAAR_BIN@|$install_path|g; s|^Exec=mediaar |Exec=$install_path |" \
-        "$desktop_src" >"$desktop_path"
-      chmod 0644 "$desktop_path"
-      info "mediaar: installed desktop entry to $desktop_path"
-    else
-      warn "mediaar: desktop entry missing from archive"
-    fi
-
-    for size in 32x32 128x128 256x256; do
+    icon_file=""
+    for size in 128x128 256x256 32x32; do
       icon_src=""
       if [ -f "$root/icons/${size}.png" ]; then
         icon_src="$root/icons/${size}.png"
@@ -389,8 +372,42 @@ install_mediaar() {
         mkdir -p "$(dirname "$icon_dest")"
         install -m 0644 "$icon_src" "$icon_dest"
         info "mediaar: installed icon $icon_dest"
+        # Prefer a mid/large absolute path for launchers that skip theme lookup.
+        if [ -z "$icon_file" ] || [ "$size" = "128x128" ]; then
+          icon_file="$icon_dest"
+        fi
       fi
     done
+
+    # Unthemed fallback some pickers check before hicolor.
+    if [ -n "$icon_file" ]; then
+      mkdir -p "${data_home}/icons"
+      install -m 0644 "$icon_file" "${data_home}/icons/mediaar.png"
+      info "mediaar: installed icon ${data_home}/icons/mediaar.png"
+    fi
+
+    desktop_src=""
+    if [ -f "$root/mediaar.desktop" ]; then
+      desktop_src="$root/mediaar.desktop"
+    elif [ -f "$root/share/applications/mediaar.desktop" ]; then
+      desktop_src="$root/share/applications/mediaar.desktop"
+    fi
+
+    if [ -n "$desktop_src" ]; then
+      mkdir -p "$(dirname "$desktop_path")"
+      # Absolute Exec= and Icon= so GUI launchers work without PATH / icon-theme lookup.
+      icon_value="${icon_file:-mediaar}"
+      sed \
+        -e "s|@MEDIAAR_BIN@|$install_path|g" \
+        -e "s|@MEDIAAR_ICON@|$icon_value|g" \
+        -e "s|^Exec=mediaar |Exec=$install_path |" \
+        -e "s|^Icon=mediaar\$|Icon=$icon_value|" \
+        "$desktop_src" >"$desktop_path"
+      chmod 0644 "$desktop_path"
+      info "mediaar: installed desktop entry to $desktop_path"
+    else
+      warn "mediaar: desktop entry missing from archive"
+    fi
 
     if command -v update-desktop-database >/dev/null 2>&1; then
       update-desktop-database "${data_home}/applications" >/dev/null 2>&1 || true

@@ -100,25 +100,19 @@ uninstall_mediaar() {
   info "mediaar: uninstall desktop $desktop_path"
   info "mediaar: uninstall icons   $icon_root/*/apps/mediaar.png"
 
-  if [ "$DRY_RUN" = "1" ]; then
-    remove_path "$install_path"
-    remove_path "$man_path"
-    remove_path "$zsh_path"
-    remove_path "$desktop_path"
-    for size in 32x32 128x128 256x256; do
-      remove_path "${icon_root}/${size}/apps/mediaar.png"
-    done
-    info "mediaar: dry-run complete (no files removed)"
-    return 0
-  fi
-
   remove_path "$install_path"
   remove_path "$man_path"
   remove_path "$zsh_path"
   remove_path "$desktop_path"
+  remove_path "${data_home}/icons/mediaar.png"
   for size in 32x32 128x128 256x256; do
     remove_path "${icon_root}/${size}/apps/mediaar.png"
   done
+
+  if [ "$DRY_RUN" = "1" ]; then
+    info "mediaar: dry-run complete (no files removed)"
+    return 0
+  fi
 
   if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database "${data_home}/applications" >/dev/null 2>&1 || true
