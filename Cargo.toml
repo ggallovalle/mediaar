@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/mediaar"]
+members = ["crates/kbgpui", "crates/mediaar"]
 
 [workspace.package]
 version = "0.2.0"
@@ -13,6 +13,7 @@ crossterm = "0.29"
 dirs = "6"
 fluent = "0.17"
 gpui = "0.2.2"
+kbgpui = { path = "crates/kbgpui" }
 ratatui = "0.30"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

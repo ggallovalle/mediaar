@@ -5,9 +5,12 @@
 use catppuccin::{Flavor, PALETTE};
 use fluent::{FluentArgs, FluentValue};
 use gpui::{
-    App, Application, Bounds, ClickEvent, Context, FontWeight, SharedString, TitlebarOptions,
-    Window, WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
+    App, Application, Bounds, Context, FontWeight, SharedString, TitlebarOptions, Window,
+    WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
 };
+use kbgpui::theme::{self, Theme};
+use kbgpui::ui::SwitchField;
+use kbgpui::ui::prelude::*;
 
 use crate::cli::CliState;
 use crate::i18n;
@@ -66,6 +69,13 @@ impl Welcome {
 
     fn toggle_theme(&mut self, cx: &mut Context<Self>) {
         self.theme = self.theme.toggle();
+        theme::set_theme(
+            cx,
+            match self.theme {
+                ThemeMode::Light => Theme::latte(),
+                ThemeMode::Dark => Theme::mocha(),
+            },
+        );
         cx.notify();
     }
 
@@ -105,8 +115,6 @@ impl Render for Welcome {
         let subtext0 = ctp(&colors.subtext0);
         let lavender = ctp(&colors.lavender);
         let surface1 = ctp(&colors.surface1);
-        let mantle = ctp(&colors.mantle);
-        let surface0 = ctp(&colors.surface0);
 
         let theme_key = self.theme_key().to_owned();
         let next_theme_key = self.next_theme_key().to_owned();
@@ -138,14 +146,8 @@ impl Render for Welcome {
         let theme_label = self.attr("theme-toggle", "label", Some(&theme_args));
         let theme_hint = self.attr("theme-toggle", "hint", Some(&theme_args));
 
-        let toggle_colors = ToggleColors {
-            border: surface1,
-            bg: mantle,
-            text,
-            hint: subtext0,
-            hover_border: lavender,
-            hover_bg: surface0,
-        };
+        let lang_on = ToggleState::from(self.settings.lang.language.as_str() == "es");
+        let theme_on = ToggleState::from(matches!(self.theme, ThemeMode::Dark));
 
         div()
             .size_full()
@@ -218,18 +220,18 @@ impl Render for Welcome {
                                 div()
                                     .flex()
                                     .gap_2()
-                                    .child(toggle_button(
+                                    .child(SwitchField::new(
                                         "lang-toggle",
-                                        lang_label,
-                                        lang_hint,
-                                        toggle_colors,
+                                        Some(lang_label),
+                                        Some(lang_hint),
+                                        lang_on,
                                         cx.listener(|this, _, _, cx| this.toggle_lang(cx)),
                                     ))
-                                    .child(toggle_button(
+                                    .child(SwitchField::new(
                                         "theme-toggle",
-                                        theme_label,
-                                        theme_hint,
-                                        toggle_colors,
+                                        Some(theme_label),
+                                        Some(theme_hint),
+                                        theme_on,
                                         cx.listener(|this, _, _, cx| this.toggle_theme(cx)),
                                     )),
                             ),
@@ -279,48 +281,6 @@ impl Render for Welcome {
     }
 }
 
-#[derive(Clone, Copy)]
-struct ToggleColors {
-    border: gpui::Rgba,
-    bg: gpui::Rgba,
-    text: gpui::Rgba,
-    hint: gpui::Rgba,
-    hover_border: gpui::Rgba,
-    hover_bg: gpui::Rgba,
-}
-
-fn toggle_button(
-    id: &'static str,
-    label: SharedString,
-    hint: SharedString,
-    colors: ToggleColors,
-    on_click: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
-) -> impl IntoElement {
-    div()
-        .id(id)
-        .flex()
-        .flex_col()
-        .items_end()
-        .gap_1()
-        .px_3()
-        .py_2()
-        .rounded_lg()
-        .border_1()
-        .border_color(colors.border)
-        .bg(colors.bg)
-        .text_color(colors.text)
-        .cursor_pointer()
-        .hover(move |style| style.border_color(colors.hover_border).bg(colors.hover_bg))
-        .on_click(on_click)
-        .child(
-            div()
-                .text_sm()
-                .font_weight(FontWeight::SEMIBOLD)
-                .child(label),
-        )
-        .child(div().text_xs().text_color(colors.hint).child(hint))
-}
-
 fn showcase_row(text: SharedString, accent: gpui::Rgba, color: gpui::Rgba) -> impl IntoElement {
     div()
         .flex()
@@ -334,6 +294,7 @@ fn showcase_row(text: SharedString, accent: gpui::Rgba, color: gpui::Rgba) -> im
 
 pub fn run(state: CliState) {
     Application::new().run(move |cx: &mut App| {
+        theme::init(cx);
         let bounds = Bounds::centered(None, size(px(960.), px(640.)), cx);
         cx.open_window(
             WindowOptions {

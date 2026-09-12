@@ -1,0 +1,11 @@
+[package]
+name = "kbgpui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "GPUI widgets and Catppuccin theme, laid out like Zed's ui crate"
+publish = false
+
+[dependencies]
+catppuccin = { workspace = true }
+gpui = { workspace = true }

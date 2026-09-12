@@ -3197,6 +3197,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "kbgpui"
+version = "0.2.0"
+dependencies = [
+ "catppuccin",
+ "gpui",
+]
+
+[[package]]
 name = "khronos-egl"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3494,6 +3502,7 @@ dependencies = [
  "crossterm",
  "fluent",
  "gpui",
+ "kbgpui",
  "ratatui",
  "unic-langid",
  "usage-config",

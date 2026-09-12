@@ -55,6 +55,7 @@ mediaar/
 ├── usage/mediaar.usage.kdl    # checked-in usage spec (keep in sync with CLI)
 ├── packaging/                 # man, zsh completion, desktop entry, icons
 ├── scripts/pack-release.sh    # builds GitHub/binstall .tgz + SHA256SUMS
+├── crates/kbgpui/             # GPUI widgets (`ui`) + Catppuccin theme (Zed-shaped)
 ├── crates/mediaar/            # the only distributable package
 │   ├── src/                   # usage-rs CLI + ratatui + GPUI entry
 │   ├── locales/

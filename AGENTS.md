@@ -9,7 +9,7 @@ Mediaar is **one Cargo package / one binary** (`crates/mediaar`) with two fronte
 - `mediaar desktop` — GPUI + Catppuccin Latte/Mocha
 - `mediaar tui` — ratatui + `catppuccin` crate, same flavors
 
-Do **not** split desktop into a second installable crate.
+Reusable desktop widgets live in **library** crate `kbgpui` (`ui` module, Zed-shaped). Do **not** split desktop into a second installable crate.
 
 ## Source of truth
 
@@ -19,6 +19,7 @@ Do **not** split desktop into a second installable crate.
 | Checked-in CLI spec | `usage/mediaar.usage.kdl` (regenerate via `__usage_spec__`) |
 | Tool versions / tasks | `mise.toml` |
 | Infra overview | `docs/infra.md` |
+| Zed GPUI/`ui` navigation | skill `zed-ui` (`.cursor/skills/zed-ui/`) |
 | Package README | `crates/mediaar/README.md` |
 | Tauri→GPUI comparison | tag `comparison/gpui-vs-tauri` (`benches/`; not on `main`) |
 
@@ -36,6 +37,7 @@ When adding/changing CLI flags or subcommands, update the Rust CLI first, then r
 | --- | --- |
 | CLI / dispatch | `crates/mediaar/src/cli/` |
 | Desktop host (GPUI) | `crates/mediaar/src/desktop.rs` |
+| Desktop widgets | `crates/kbgpui` (`ui` / `theme`, same layout as Zed) |
 | TUI | `crates/mediaar/src/tui/` |
 | Fluent locales | `crates/mediaar/locales/{en,es}/{common,desktop,tui}.ftl` |
 | Icons / packaging | `crates/mediaar/icons/`, `packaging/` |
