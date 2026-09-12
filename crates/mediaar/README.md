@@ -24,7 +24,7 @@ mediaar --help
 
 Locale files live in `locales/{en,es}/` as Fluent resources (`common.ftl` shared, plus `desktop.ftl` / `tui.ftl`). Language resolution uses usage-config layers: `--lang` → `~/.config/mediaar/config.toml` (UI toggle) → system locale default (`LANG` / `LC_*`, else `en`).
 
-Both UIs ship inside the `mediaar` binary. Desktop is native GPUI (no embedded webview). See [`INFRA.md`](../../INFRA.md) for why GPUI replaced Tauri.
+Both UIs ship inside the `mediaar` binary. Desktop is native GPUI (no embedded webview). See [`infra.md`](../../docs/infra.md) for why GPUI replaced Tauri.
 
 ## Develop
 

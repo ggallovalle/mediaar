@@ -13,6 +13,9 @@
 *.local
 crates/mediaar/app-icon.png
 
+# rumdl
+.rumdl_cache
+
 # editors
 .vscode/*
 !.vscode/extensions.json

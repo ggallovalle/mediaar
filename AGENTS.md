@@ -18,7 +18,7 @@ Do **not** split desktop into a second installable crate.
 | CLI commands | usage-rs derives in `crates/mediaar/src/cli/` |
 | Checked-in CLI spec | `usage/mediaar.usage.kdl` (regenerate via `__usage_spec__`) |
 | Tool versions / tasks | `mise.toml` |
-| Infra overview | `INFRA.md` |
+| Infra overview | `docs/infra.md` |
 | Package README | `crates/mediaar/README.md` |
 | Tauri→GPUI comparison | tag `comparison/gpui-vs-tauri` (`benches/`; not on `main`) |
 
@@ -54,7 +54,7 @@ cargo build -p mediaar --release
 
 ## Do not
 
-- Reintroduce Tauri / Solid / Vite without an explicit decision (see `INFRA.md`)
+- Reintroduce Tauri / Solid / Vite without an explicit decision (see `docs/infra.md`)
 - Check experiment `benches/` metrics back into `main` (keep them on `comparison/gpui-vs-tauri`)
 - Add purple-default generic AI chrome; stick to Catppuccin Latte/Mocha and the existing welcome composition
 - Commit secrets (`.env`), `node_modules`, or unrelated lockfile churn
