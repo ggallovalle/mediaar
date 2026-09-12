@@ -4,6 +4,7 @@ node = "26.3.1"
 rust = "1.98.0"
 usage = "6.8.0"
 pnpm = "10.14.0"
+rumdl = "0.2.71"
 
 [tasks.dev-desktop]
 description = "Run Mediaar desktop from the single binary"
@@ -18,17 +19,19 @@ description = "Build the distributable mediaar binary"
 run = "cargo build -p mediaar --release"
 
 [tasks.format]
-description = "Format Rust (rustfmt) and configs (Biome via pnpm)"
+description = "Format Rust (rustfmt), configs (Biome), and Markdown (rumdl)"
 run = [
   "cargo fmt --all",
   "pnpm exec biome format --write",
+  "rumdl fmt",
 ]
 
 [tasks.lint]
-description = "Lint Rust (clippy) and Biome via pnpm"
+description = "Lint Rust (clippy), Biome, and Markdown (rumdl)"
 run = [
   "cargo clippy --workspace --all-targets -- -D warnings",
   "pnpm exec biome lint",
+  "rumdl check",
 ]
 
 [tasks.typecheck]

@@ -7,6 +7,12 @@ use usage::{Cli, Subcommands};
 
 use crate::settings::Settings;
 
+/// Shared state handed to every subcommand after settings resolve.
+#[derive(Debug, Clone)]
+pub(crate) struct CliState {
+    pub(crate) settings: Settings,
+}
+
 /// Manage your media
 #[derive(Cli)]
 #[usage(
@@ -17,7 +23,7 @@ use crate::settings::Settings;
     config = Settings
 )]
 pub(crate) struct Mediaar {
-    /// UI language (e.g. en, es). Overrides the persisted toggle and system locale.
+    /// UI language (e.g. en, es). Overrides the config file and system locale.
     #[usage(long = "lang", global, setting = "lang")]
     pub(crate) lang: Option<String>,
 

@@ -5,11 +5,13 @@ pre-commit:
       run: |
         cargo fmt --all
         pnpm exec biome format --write
+        rumdl fmt
       stage_fixed: true
     - name: lint
       run: |
         cargo clippy --workspace --all-targets -- -D warnings
         pnpm exec biome lint
+        rumdl check
     - name: typecheck
       run: |
         cargo check --workspace
