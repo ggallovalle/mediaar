@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Mediaar
+Comment=Manage your media
+Exec=@MEDIAAR_BIN@ desktop
+Icon=mediaar
+Terminal=false
+Categories=AudioVideo;Graphics;Utility;
+Keywords=media;tui;desktop;
+StartupNotify=true

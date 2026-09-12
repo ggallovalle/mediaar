@@ -3,8 +3,13 @@
 Manage your media from one installable binary:
 
 ```sh
+# user install (binary + zsh completion + man + desktop launcher)
+curl -fsSL https://raw.githubusercontent.com/ggallovalle/mediaar/main/install.sh | sh
+# preview only:
+curl -fsSL .../install.sh | sh -s -- --dry-run
+
+# or via cargo
 cargo binstall mediaar
-# or
 cargo install mediaar --locked
 ```
 
@@ -37,10 +42,15 @@ cargo run -p mediaar -- desktop
 
 ## Distribute
 
+```sh
+mise run pack-release
+# upload dist/mediaar-*-*.tgz and dist/SHA256SUMS.txt to a GitHub Release
+```
+
 CI should:
 
 1. `pnpm --dir crates/mediaar/ui build`
-2. `cargo build -p mediaar --release`
-3. Publish the single `mediaar` artifact (and optionally crates.io)
+2. `cargo build -p mediaar --release` (or `mise run pack-release`)
+3. Publish the release archive (and optionally crates.io)
 
 `cargo binstall` resolves prebuilt archives via `[package.metadata.binstall]`.

@@ -27,7 +27,10 @@ Package managers: **Cargo** (Rust), **pnpm** (UI).
 ```
 mediaar/
 ├── Cargo.toml                 # workspace root
+├── install.sh                 # curl|sh user installer (mise-style)
 ├── usage/mediaar.usage.kdl    # checked-in usage spec (keep in sync with CLI)
+├── packaging/                 # man, zsh completion, desktop entry, icons
+├── scripts/pack-release.sh    # builds GitHub/binstall .tgz + SHA256SUMS
 ├── crates/mediaar/            # the only distributable package
 │   ├── src/                   # usage-rs CLI + ratatui + Tauri entry
 │   ├── ui/                    # SolidJS 2 RC + Tailwind + Catppuccin
@@ -84,7 +87,28 @@ For hot-reload, the Vite server must be up if you temporarily run without embedd
 
 ## Distribution
 
-Target install paths:
+### curl | sh (user install)
+
+[`install.sh`](install.sh) is a mise-style user installer (not system-wide). It places:
+
+| Artifact | Path |
+| --- | --- |
+| Binary | `~/.local/bin/mediaar` |
+| Man page | `~/.local/share/man/man1/mediaar.1` |
+| Zsh completion | `~/.local/share/zsh/site-functions/_mediaar` |
+| Desktop entry | `~/.local/share/applications/mediaar.desktop` |
+| Icons | `~/.local/share/icons/hicolor/*/apps/mediaar.png` |
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ggallovalle/mediaar/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ggallovalle/mediaar/main/install.sh | sh -s -- --dry-run
+curl -fsSL https://raw.githubusercontent.com/ggallovalle/mediaar/main/uninstall.sh | sh
+MEDIAAR_VERSION=0.1.0 MEDIAAR_GITHUB_REPO=ggallovalle/mediaar sh install.sh
+```
+
+The desktop entry’s `Exec=` is rewritten to the absolute installed binary so app launchers can start `mediaar desktop` without relying on GUI `PATH`.
+
+### cargo
 
 ```sh
 cargo binstall mediaar
@@ -95,13 +119,22 @@ cargo install mediaar --locked
 
 `mediaar-{version}-{target}.tgz` (zip on Windows MSVC).
 
+Build a release archive (binary + man + zsh + desktop + icons):
+
+```sh
+mise run pack-release
+# → dist/mediaar-{version}-{target}.tgz + dist/SHA256SUMS.txt
+```
+
 CI should:
 
 1. `pnpm --dir crates/mediaar/ui build`
-2. `cargo build -p mediaar --release`
-3. Upload the single `mediaar` binary (and optionally `cargo publish -p mediaar`)
+2. `cargo build -p mediaar --release` (or `mise run pack-release`)
+3. Upload the `.tgz` (+ `SHA256SUMS.txt`) to GitHub Releases (and optionally `cargo publish -p mediaar`)
 
 Published crate includes `ui/dist` via package `include` so source installs can skip a fresh UI build when dist is present.
+
+Packaging sources live under [`packaging/`](packaging/) (desktop entry, completions, man, icons).
 
 ## Config / secrets
 

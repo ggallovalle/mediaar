@@ -1,7 +1,7 @@
 [tools]
 node = "26.3.1"
 rust = "1.98.0"
-usage = "4.1.0"
+usage = "6.8.0"
 
 [tasks.ui]
 description = "Install and build the embedded desktop UI"
@@ -20,3 +20,11 @@ run = "cargo run -p mediaar -- tui"
 description = "Build the distributable mediaar binary"
 depends = ["ui"]
 run = "cargo build -p mediaar --release"
+
+[tasks.pack-release]
+description = "Build release tarball with binary, man, zsh completion, desktop entry, icons"
+run = "scripts/pack-release.sh"
+
+[tasks.install-script-dry-run]
+description = "Dry-run the user install script"
+run = "sh install.sh --dry-run"

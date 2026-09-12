@@ -41,6 +41,9 @@ When adding/changing CLI flags or subcommands, update the Rust CLI first, then r
 | Welcome UI | `crates/mediaar/ui/src/` |
 | Tauri config / icons / capabilities | `crates/mediaar/tauri.conf.json`, `icons/`, `capabilities/` |
 | Build / embed hooks | `crates/mediaar/build.rs` |
+| User install script | `install.sh` |
+| User uninstall script | `uninstall.sh` |
+| Release packaging | `scripts/pack-release.sh`, `packaging/` |
 
 ## Build / verify
 
