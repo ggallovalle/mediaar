@@ -1,0 +1,87 @@
+{
+  "tauri": {
+    "label": "tauri",
+    "git_sha": "d8cac0a",
+    "timestamp": "2026-09-12T01:23:39-06:00",
+    "build_time_ms": 72236,
+    "binary_size_bytes": 7411864,
+    "binary_size_human": "7.1MB",
+    "unique_dep_crates": 327,
+    "ui_dist_present": true,
+    "ui_dist_bytes": 114410,
+    "help_startup_ms_samples": [
+      91,
+      34,
+      34,
+      32,
+      34,
+      32,
+      34,
+      35,
+      33,
+      32
+    ],
+    "help_startup_ms_avg": 39.1,
+    "desktop_startup_ms_samples": [
+      259,
+      207,
+      209,
+      208,
+      208
+    ],
+    "desktop_startup_ms_avg": 218.2,
+    "notes": {
+      "build": "cargo clean -p mediaar then cargo build -p mediaar --release (deps warm)",
+      "desktop_startup": "spawn until MEDIAAR_BENCH_READY_FILE appears"
+    }
+  },
+  "gpui": {
+    "label": "gpui",
+    "git_sha": "d8cac0a",
+    "timestamp": "2026-09-12T01:32:31-06:00",
+    "build_time_ms": 81347,
+    "binary_size_bytes": 13251360,
+    "binary_size_human": "13MB",
+    "unique_dep_crates": 521,
+    "ui_dist_present": false,
+    "ui_dist_bytes": 0,
+    "help_startup_ms_samples": [
+      4,
+      3,
+      2,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2
+    ],
+    "help_startup_ms_avg": 2.5,
+    "desktop_startup_ms_samples": [
+      466,
+      106,
+      106,
+      106,
+      105
+    ],
+    "desktop_startup_ms_avg": 177.8,
+    "notes": {
+      "build": "cargo clean -p mediaar then cargo build -p mediaar --release (deps warm)",
+      "desktop_startup": "spawn until MEDIAAR_BENCH_READY_FILE appears"
+    }
+  },
+  "delta": {
+    "build_time_ms": 9111,
+    "build_time_pct": 12.6,
+    "binary_size_bytes": 5839496,
+    "binary_size_pct": 78.8,
+    "unique_dep_crates": 194,
+    "help_startup_ms_avg": -36.6,
+    "desktop_startup_ms_avg": -40.4,
+    "desktop_startup_steady_ms": {
+      "tauri": 208.0,
+      "gpui": 105.8
+    }
+  }
+}

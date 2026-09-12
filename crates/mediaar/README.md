@@ -16,7 +16,7 @@ cargo install mediaar --locked
 ## Commands
 
 ```sh
-mediaar desktop   # Catppuccin Tauri + Solid desktop app
+mediaar desktop   # Catppuccin GPUI desktop app (experiment)
 mediaar tui       # Catppuccin ratatui welcome screen
 mediaar --lang es desktop   # force Spanish for this run
 mediaar --help
@@ -24,24 +24,22 @@ mediaar --help
 
 Locale files live in `locales/{en,es}/` as Fluent resources (`common.ftl` shared, plus `desktop.ftl` / `tui.ftl`). Language resolution uses usage-config layers: `--lang` → `~/.config/mediaar/config.toml` (UI toggle) → system locale default (`LANG` / `LC_*`, else `en`).
 
-Both UIs ship inside the `mediaar` binary. The desktop frontend is embedded at build time from `ui/dist`.
+Both UIs ship inside the `mediaar` binary. Desktop is native GPUI (no embedded webview).
 
 ## Develop
 
 ```sh
-pnpm --dir crates/mediaar/ui install
-pnpm --dir crates/mediaar/ui build
 cargo run -p mediaar -- tui
 cargo run -p mediaar -- desktop
 ```
 
-For hot-reload UI work, run Vite and the binary together:
+## Benchmarks (Tauri → GPUI experiment)
 
 ```sh
-pnpm --dir crates/mediaar/ui dev
-# in another shell, with the Vite server up:
-cargo run -p mediaar -- desktop
+./benches/measure-desktop.sh gpui benches/results-gpui.json
 ```
+
+Compares package rebuild time, binary size, `--help` startup, and desktop ready-file startup. See `benches/results-*.json`.
 
 ## Distribute
 
@@ -52,8 +50,7 @@ mise run pack-release
 
 CI should:
 
-1. `pnpm --dir crates/mediaar/ui build`
-2. `cargo build -p mediaar --release` (or `mise run pack-release`)
-3. Publish the release archive (and optionally crates.io)
+1. `cargo build -p mediaar --release` (or `mise run pack-release`)
+2. Publish the release archive (and optionally crates.io)
 
 `cargo binstall` resolves prebuilt archives via `[package.metadata.binstall]`.

@@ -7,10 +7,12 @@ use fluent::concurrent::FluentBundle;
 use fluent::{FluentArgs, FluentResource, FluentValue};
 use unic_langid::LanguageIdentifier;
 
-/// Shared + TUI resources embedded in the binary.
+/// Shared + surface resources embedded in the binary.
 const EN_COMMON: &str = include_str!("../../locales/en/common.ftl");
+const EN_DESKTOP: &str = include_str!("../../locales/en/desktop.ftl");
 const EN_TUI: &str = include_str!("../../locales/en/tui.ftl");
 const ES_COMMON: &str = include_str!("../../locales/es/common.ftl");
+const ES_DESKTOP: &str = include_str!("../../locales/es/desktop.ftl");
 const ES_TUI: &str = include_str!("../../locales/es/tui.ftl");
 
 /// Locales shipped with the binary / UI bundle.
@@ -20,8 +22,10 @@ pub const FALLBACK: &str = "en";
 
 type Bundle = FluentBundle<FluentResource>;
 
-static EN_BUNDLE: OnceLock<Bundle> = OnceLock::new();
-static ES_BUNDLE: OnceLock<Bundle> = OnceLock::new();
+static EN_TUI_BUNDLE: OnceLock<Bundle> = OnceLock::new();
+static ES_TUI_BUNDLE: OnceLock<Bundle> = OnceLock::new();
+static EN_DESKTOP_BUNDLE: OnceLock<Bundle> = OnceLock::new();
+static ES_DESKTOP_BUNDLE: OnceLock<Bundle> = OnceLock::new();
 
 /// Resolved UI language for a session.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -91,10 +95,17 @@ pub fn system_locale() -> Option<String> {
     None
 }
 
-fn bundle_for(tag: &str) -> &'static Bundle {
+fn tui_bundle(tag: &str) -> &'static Bundle {
     match negotiate(tag).as_str() {
-        "es" => ES_BUNDLE.get_or_init(|| load_bundle("es", &[ES_COMMON, ES_TUI])),
-        _ => EN_BUNDLE.get_or_init(|| load_bundle("en", &[EN_COMMON, EN_TUI])),
+        "es" => ES_TUI_BUNDLE.get_or_init(|| load_bundle("es", &[ES_COMMON, ES_TUI])),
+        _ => EN_TUI_BUNDLE.get_or_init(|| load_bundle("en", &[EN_COMMON, EN_TUI])),
+    }
+}
+
+fn desktop_bundle(tag: &str) -> &'static Bundle {
+    match negotiate(tag).as_str() {
+        "es" => ES_DESKTOP_BUNDLE.get_or_init(|| load_bundle("es", &[ES_COMMON, ES_DESKTOP])),
+        _ => EN_DESKTOP_BUNDLE.get_or_init(|| load_bundle("en", &[EN_COMMON, EN_DESKTOP])),
     }
 }
 
@@ -131,9 +142,12 @@ fn add_resource(bundle: &mut Bundle, tag: &str, source: &str) {
     }
 }
 
-/// Format a message value for `tag`.
-pub fn t<'a>(tag: &str, id: &str, args: Option<&'a FluentArgs<'a>>) -> Cow<'static, str> {
-    let bundle = bundle_for(tag);
+fn format_message(
+    bundle: &Bundle,
+    tag: &str,
+    id: &str,
+    args: Option<&FluentArgs<'_>>,
+) -> Cow<'static, str> {
     let Some(message) = bundle.get_message(id) else {
         return Cow::Owned(id.to_owned());
     };
@@ -149,14 +163,13 @@ pub fn t<'a>(tag: &str, id: &str, args: Option<&'a FluentArgs<'a>>) -> Cow<'stat
     Cow::Owned(value.into_owned())
 }
 
-/// Format a message attribute (e.g. `theme-toggle.label`).
-pub fn t_attr<'a>(
+fn format_attr(
+    bundle: &Bundle,
     tag: &str,
     id: &str,
     attr: &str,
-    args: Option<&'a FluentArgs<'a>>,
+    args: Option<&FluentArgs<'_>>,
 ) -> Cow<'static, str> {
-    let bundle = bundle_for(tag);
     let Some(message) = bundle.get_message(id) else {
         return Cow::Owned(format!("{id}.{attr}"));
     };
@@ -170,6 +183,36 @@ pub fn t_attr<'a>(
         eprintln!("fluent format warning ({tag}/{id}.{attr}): {err}");
     }
     Cow::Owned(value.into_owned())
+}
+
+/// Format a TUI / shared message value for `tag`.
+pub fn t<'a>(tag: &str, id: &str, args: Option<&'a FluentArgs<'a>>) -> Cow<'static, str> {
+    format_message(tui_bundle(tag), tag, id, args)
+}
+
+/// Format a TUI / shared message attribute (e.g. `theme-toggle.label`).
+pub fn t_attr<'a>(
+    tag: &str,
+    id: &str,
+    attr: &str,
+    args: Option<&'a FluentArgs<'a>>,
+) -> Cow<'static, str> {
+    format_attr(tui_bundle(tag), tag, id, attr, args)
+}
+
+/// Format a desktop message value for `tag` (common + desktop.ftl).
+pub fn t_desktop<'a>(tag: &str, id: &str, args: Option<&'a FluentArgs<'a>>) -> Cow<'static, str> {
+    format_message(desktop_bundle(tag), tag, id, args)
+}
+
+/// Format a desktop message attribute.
+pub fn t_attr_desktop<'a>(
+    tag: &str,
+    id: &str,
+    attr: &str,
+    args: Option<&'a FluentArgs<'a>>,
+) -> Cow<'static, str> {
+    format_attr(desktop_bundle(tag), tag, id, attr, args)
 }
 
 /// Args commonly used by the welcome / showcase surfaces.
@@ -280,5 +323,15 @@ mod tests {
         let args = showcase_args("Alex", &date);
         let value = t("en", "showcase-number", Some(&args));
         assert!(value.contains("1.5"), "{value}");
+    }
+
+    #[test]
+    fn formats_desktop_welcome() {
+        assert_eq!(t_desktop("en", "welcome-title", None).as_ref(), "Welcome");
+        assert!(
+            t_desktop("en", "showcase-nested", None).contains("language control"),
+            "{}",
+            t_desktop("en", "showcase-nested", None)
+        );
     }
 }

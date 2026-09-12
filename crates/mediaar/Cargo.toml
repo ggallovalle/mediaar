@@ -7,19 +7,13 @@ description = "Manage your media"
 readme = "README.md"
 repository = "https://github.com/ggallovalle/mediaar"
 homepage = "https://github.com/ggallovalle/mediaar"
-keywords = ["media", "tui", "desktop", "tauri"]
+keywords = ["media", "tui", "desktop", "gpui"]
 categories = ["command-line-utilities", "gui"]
 default-run = "mediaar"
 include = [
   "src/**/*",
   "locales/**/*",
-  "ui/dist/**/*",
-  "ui/package.json",
-  "ui/pnpm-lock.yaml",
   "icons/**/*",
-  "capabilities/**/*",
-  "tauri.conf.json",
-  "build.rs",
   "README.md",
 ]
 
@@ -32,17 +26,13 @@ catppuccin = { workspace = true }
 crossterm = { workspace = true }
 dirs = { workspace = true }
 fluent = { workspace = true }
+gpui = { workspace = true }
 ratatui = { workspace = true }
 serde = { workspace = true }
-tauri = { workspace = true }
-tauri-plugin-opener = { workspace = true }
 toml = { workspace = true }
 unic-langid = { workspace = true }
 usage = { workspace = true }
 usage-config = { workspace = true }
-
-[build-dependencies]
-tauri-build = { workspace = true }
 
 [dev-dependencies]
 usage = { package = "usage-rs", version = "6", features = ["test"] }

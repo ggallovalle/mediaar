@@ -9,22 +9,21 @@ mise install
 gh auth status   # logged into GitHub with repo access
 ```
 
-Linux desktop builds need the usual Tauri / WebKitGTK system packages.
+Linux desktop builds need a working Wayland or X11 display stack (GPUI / Blade).
 
 ## Version bump
 
-Bump these together so `--version`, the archive name, and Tauri agree:
+Bump these together so `--version` and the archive name agree:
 
 | Location | Field |
 | --- | --- |
 | [`Cargo.toml`](Cargo.toml) | `[workspace.package] version` |
 | [`crates/mediaar/src/cli/mod.rs`](crates/mediaar/src/cli/mod.rs) | `#[usage(..., version = "...")]` |
-| [`crates/mediaar/tauri.conf.json`](crates/mediaar/tauri.conf.json) | `version` |
 
 Example for `0.2.0`:
 
 ```sh
-# edit the three places above, then refresh the checked-in usage spec
+# edit the places above, then refresh the checked-in usage spec
 cargo run -p mediaar -- __usage_spec__ > usage/mediaar.usage.kdl
 ```
 
@@ -120,10 +119,9 @@ Check that the installed `.desktop` has absolute `Exec=` and `Icon=` paths, then
 
 ## Optional: crates.io
 
-When the crate is ready to publish (includes embedded `ui/dist` via package `include`):
+When the crate is ready to publish:
 
 ```sh
-mise run ui
 cargo publish -p mediaar --dry-run
 cargo publish -p mediaar
 ```
@@ -143,7 +141,7 @@ Windows MSVC archives should be `.zip` to match `[package.metadata.binstall.over
 
 ## Checklist
 
-- [ ] Version bumped in workspace `Cargo.toml`, CLI `#[usage]`, and `tauri.conf.json`
+- [ ] Version bumped in workspace `Cargo.toml` and CLI `#[usage]`
 - [ ] `usage/mediaar.usage.kdl` refreshed if the CLI surface changed
 - [ ] `mise run pack-release` succeeded
 - [ ] Git tag `v{version}` pushed

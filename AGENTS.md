@@ -6,10 +6,10 @@ Guidance for coding agents working in this repository.
 
 Mediaar is **one Cargo package / one binary** (`crates/mediaar`) with two frontends:
 
-- `mediaar desktop` — Tauri 2 + SolidJS 2 RC + Tailwind, Catppuccin Latte/Mocha
+- `mediaar desktop` — GPUI + Catppuccin Latte/Mocha (experiment: replaces Tauri/Solid)
 - `mediaar tui` — ratatui + `catppuccin` crate, same flavors
 
-Do **not** split desktop into a second installable crate or require `pnpm tauri dev` at runtime for shipped builds.
+Do **not** split desktop into a second installable crate.
 
 ## Source of truth
 
@@ -20,28 +20,25 @@ Do **not** split desktop into a second installable crate or require `pnpm tauri 
 | Tool versions / tasks | `mise.toml` |
 | Infra overview | `INFRA.md` |
 | Package README | `crates/mediaar/README.md` |
+| Desktop metrics | `benches/measure-desktop.sh`, `benches/results-*.json` |
 
 When adding/changing CLI flags or subcommands, update the Rust CLI first, then refresh `usage/mediaar.usage.kdl`.
 
 ## Hard rules
 
-1. **Single binary** — desktop UI is embedded via Tauri `custom-protocol` + `ui/dist`. Never ship a flow that depends on a localhost Vite server for release.
-2. **Keep `custom-protocol` and `image-png` enabled** on the `tauri` dependency. Missing `custom-protocol` causes “Could not connect to localhost”.
-3. **Catppuccin only for themes** — Latte (light) and Mocha (dark) on both desktop and TUI.
-4. **Solid 2 RC stack** — `solid-js` / `@solidjs/web` RC + `@solidjs/vite-plugin` (not `vite-plugin-solid` v2 / Solid 1).
-5. **Minimal diffs** — no drive-by refactors, no unsolicited markdown beyond what was asked, match existing style.
+1. **Single binary** — desktop UI is native GPUI compiled into `mediaar`.
+2. **Catppuccin only for themes** — Latte (light) and Mocha (dark) on both desktop and TUI.
+3. **Minimal diffs** — no drive-by refactors, no unsolicited markdown beyond what was asked, match existing style.
 
 ## Where to edit
 
 | Change | Path |
 | --- | --- |
 | CLI / dispatch | `crates/mediaar/src/cli/` |
-| Desktop host | `crates/mediaar/src/desktop.rs` |
+| Desktop host (GPUI) | `crates/mediaar/src/desktop.rs` |
 | TUI | `crates/mediaar/src/tui/` |
-| Welcome UI | `crates/mediaar/ui/src/` |
 | Fluent locales | `crates/mediaar/locales/{en,es}/{common,desktop,tui}.ftl` |
-| Tauri config / icons / capabilities | `crates/mediaar/tauri.conf.json`, `icons/`, `capabilities/` |
-| Build / embed hooks | `crates/mediaar/build.rs` |
+| Icons / packaging | `crates/mediaar/icons/`, `packaging/` |
 | User install script | `install.sh` |
 | User uninstall script | `uninstall.sh` |
 | Release packaging | `scripts/pack-release.sh`, `packaging/` |
@@ -49,19 +46,15 @@ When adding/changing CLI flags or subcommands, update the Rust CLI first, then r
 ## Build / verify
 
 ```sh
-mise run ui
 cargo build -p mediaar --release
 ./target/release/mediaar --help
 ./target/release/mediaar tui      # needs a real TTY
-./target/release/mediaar desktop  # should show welcome UI, not localhost errors
+./target/release/mediaar desktop  # GPUI welcome window
 ```
-
-If `ui/dist` is missing, `build.rs` tries `pnpm` automatically. Prefer `mise run ui` explicitly in CI.
 
 ## Do not
 
-- Reintroduce a separate `mediaar-desktop` / `src-tauri` workspace member for distribution
-- Remove `custom-protocol` “for easier dev” without a documented alternate path
+- Reintroduce Tauri / Solid / Vite for this experiment branch without an explicit decision
 - Add purple-default generic AI chrome; stick to Catppuccin Latte/Mocha and the existing welcome composition
 - Commit secrets (`.env`), `node_modules`, or unrelated lockfile churn
 
