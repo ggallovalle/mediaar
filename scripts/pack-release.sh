@@ -43,8 +43,8 @@ STAGE="$OUT_DIR/stage"
 ARCHIVE="$OUT_DIR/mediaar-${VERSION}-${TARGET}.tgz"
 
 if [ "$SKIP_BUILD" != "1" ]; then
-  echo "pack-release: building UI + release binary..."
-  mise run build
+  echo "pack-release: building release binary..."
+  cargo build -p mediaar --release
 fi
 
 BIN="$ROOT/target/release/mediaar"
@@ -55,7 +55,11 @@ fi
 
 echo "pack-release: regenerating man page + zsh completion..."
 mkdir -p packaging/man packaging/completions packaging/icons packaging/applications
-"$BIN" __usage_spec__ | mise exec -- usage generate manpage -f - >packaging/man/mediaar.1
+if command -v usage >/dev/null 2>&1; then
+  "$BIN" __usage_spec__ | usage generate manpage -f - >packaging/man/mediaar.1
+else
+  "$BIN" __usage_spec__ | mise exec -- usage generate manpage -f - >packaging/man/mediaar.1
+fi
 
 # Keep packaging/completions/_mediaar as the checked-in binary-backed script.
 # Refresh icon copies from the crate icon set.

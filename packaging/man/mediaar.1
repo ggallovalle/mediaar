@@ -8,6 +8,9 @@ Manage your media
 .PP
 .SH OPTIONS
 .TP
+\fB\-\-lang\fR \fI<LANG>\fR
+UI language (e.g. en, es). Overrides the persisted toggle and system locale.
+.TP
 \fB\-h, \-\-help\fR
 Print help
 .TP
@@ -40,3 +43,18 @@ Start the tui app
 .TP
 \fB\-h, \-\-help\fR
 Print help
+.SH CONFIGURATION
+Read from the following, in ascending precedence:
+.RS 4
+.PP
+$XDG_CONFIG_DIRS/mediaar/config.toml
+.PP
+$XDG_CONFIG_HOME/mediaar/config.toml
+.RE
+.PP
+\fBlang\fR
+.RS 4
+UI language (e.g. en, es)
+.PP
+type: string; optional: true; default: from LANG / system, else en; set with: \-\-lang
+.RE
